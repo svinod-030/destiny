@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /journeys/{journeyId} {
+      // Anyone with the code can read a journey (to view the group's locations)
+      allow read: if true;
+
+      // Creating a journey requires (anonymous) auth, and the creatorId must
+      // match the authenticated user's uid
+      allow create: if request.auth != null &&
+                     request.resource.data.creatorId == request.auth.uid;
+
+      // Only the creator can end a journey
+      allow delete: if request.auth != null &&
+                     resource.data.creatorId == request.auth.uid;
+
+      // The creator can update anything (e.g. join is handled server-side by
+      // the joining member below). Any other member may only touch the
+      // `members` and `lastUpdatedAt` top-level fields, and within `members`
+      // only their own entry (their own location / join / leave) - never
+      // anyone else's.
+      allow update: if request.auth != null && (
+        resource.data.creatorId == request.auth.uid ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'lastUpdatedAt']) &&
+          request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid])
+        )
+      );
+    }
+  }
+}
