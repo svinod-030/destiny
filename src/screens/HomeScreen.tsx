@@ -199,71 +199,97 @@ export default function HomeScreen({ navigation }: any) {
         <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View className="px-4 pt-4 pb-2">
                 <Text className="text-white text-2xl font-black">Start a Journey</Text>
-                <Text className="text-gray-400 mt-1">Search for a destination or long-press the map</Text>
+                <Text className="text-gray-400 mt-1">Search the map or long-press to drop a pin</Text>
             </View>
 
-            <View className="px-4 pb-3">
-                <View className="flex-row gap-2">
-                    <TextInput
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder="Search for a destination"
-                        placeholderTextColor="#4b5563"
-                        className="flex-1 bg-gray-800 text-white p-4 rounded-2xl border border-gray-700"
-                        returnKeyType="search"
-                        onSubmitEditing={handleSearch}
-                    />
-                    <TouchableOpacity
-                        onPress={handleSearch}
-                        disabled={isSearching || !searchQuery.trim()}
-                        className={`w-14 items-center justify-center rounded-2xl ${isSearching || !searchQuery.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
-                            }`}
+            <View className="flex-1 mx-4">
+                <View className="flex-1 rounded-3xl overflow-hidden border border-gray-700">
+                    <MapView
+                        ref={mapRef}
+                        style={{ flex: 1 }}
+                        initialRegion={DEFAULT_REGION}
+                        onLongPress={handleLongPress}
+                        showsUserLocation={showsUserLocation}
+                        showsMyLocationButton={false}
                     >
-                        {isSearching ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                        ) : (
-                            <Ionicons name="search" size={22} color="#fff" />
-                        )}
-                    </TouchableOpacity>
+                        {pin && <Marker coordinate={pin} pinColor="#3b82f6" />}
+                    </MapView>
                 </View>
 
-                {suggestions.length > 0 && (
-                    <View className="mt-2 bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden">
-                        {suggestions.map((item, index) => (
-                            <TouchableOpacity
-                                key={item.placeId}
-                                onPress={() => handleSelectSuggestion(item)}
-                                className={`px-4 py-3 flex-row items-center active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-700' : ''
-                                    }`}
-                            >
-                                <Ionicons name="location-outline" size={18} color="#3b82f6" />
-                                <View className="ml-3 flex-1">
-                                    <Text className="text-white font-semibold" numberOfLines={1}>
-                                        {item.primaryText}
-                                    </Text>
-                                    {!!item.secondaryText && (
-                                        <Text className="text-gray-500 text-xs" numberOfLines={1}>
-                                            {item.secondaryText}
-                                        </Text>
-                                    )}
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                {/* Floating search, overlaid on the map like the Google Maps app */}
+                <View className="absolute top-3 left-3 right-3">
+                    <View className="flex-row gap-2">
+                        <TextInput
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Search for a destination"
+                            placeholderTextColor="#6b7280"
+                            className="flex-1 bg-gray-900 text-white p-4 rounded-2xl border border-gray-700"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.3,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 2 },
+                                elevation: 4,
+                            }}
+                            returnKeyType="search"
+                            onSubmitEditing={handleSearch}
+                        />
+                        <TouchableOpacity
+                            onPress={handleSearch}
+                            disabled={isSearching || !searchQuery.trim()}
+                            className={`w-14 items-center justify-center rounded-2xl ${isSearching || !searchQuery.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                                }`}
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.3,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 2 },
+                                elevation: 4,
+                            }}
+                        >
+                            {isSearching ? (
+                                <ActivityIndicator color="#fff" size="small" />
+                            ) : (
+                                <Ionicons name="search" size={22} color="#fff" />
+                            )}
+                        </TouchableOpacity>
                     </View>
-                )}
-            </View>
 
-            <View className="flex-1 mx-4 rounded-3xl overflow-hidden border border-gray-700">
-                <MapView
-                    ref={mapRef}
-                    style={{ flex: 1 }}
-                    initialRegion={DEFAULT_REGION}
-                    onLongPress={handleLongPress}
-                    showsUserLocation={showsUserLocation}
-                    showsMyLocationButton={showsUserLocation}
-                >
-                    {pin && <Marker coordinate={pin} pinColor="#3b82f6" />}
-                </MapView>
+                    {suggestions.length > 0 && (
+                        <View
+                            className="mt-2 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.3,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 2 },
+                                elevation: 4,
+                            }}
+                        >
+                            {suggestions.map((item, index) => (
+                                <TouchableOpacity
+                                    key={item.placeId}
+                                    onPress={() => handleSelectSuggestion(item)}
+                                    className={`px-4 py-3 flex-row items-center active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-700' : ''
+                                        }`}
+                                >
+                                    <Ionicons name="location-outline" size={18} color="#3b82f6" />
+                                    <View className="ml-3 flex-1">
+                                        <Text className="text-white font-semibold" numberOfLines={1}>
+                                            {item.primaryText}
+                                        </Text>
+                                        {!!item.secondaryText && (
+                                            <Text className="text-gray-500 text-xs" numberOfLines={1}>
+                                                {item.secondaryText}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
+                </View>
             </View>
 
             <View className="p-4">

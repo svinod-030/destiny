@@ -45,9 +45,11 @@ included, since they're tied to your own account/billing.
 2. **Google Maps + Places (Android only — iOS uses Apple Maps for free)**
    - Create an API key in [Google Cloud Console](https://console.cloud.google.com/) with
      the **"Maps SDK for Android"** enabled (required, for the map itself) and the
-     **"Places API"** enabled (optional, powers live search-as-you-type suggestions on
-     the Start Journey screen — without it, search still works via plain geocoding on
-     Enter/tap-search, just without a suggestions dropdown).
+     **"Places API (New)"** enabled (optional, powers live search-as-you-type
+     suggestions on the Start Journey screen — without it, search still works via
+     plain geocoding on Enter/tap-search, just without a suggestions dropdown).
+     Note this is a separate API from the older "Places API" (legacy) — enabling
+     the legacy one instead will fail with a "legacy API not enabled" error.
    - Replace `REPLACE_WITH_GOOGLE_MAPS_API_KEY` in [app.json](app.json) with it.
    - Also set `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` in `.env` to the same key, so the
      Places Autocomplete requests (made from JS, not the native Android SDK) can use
