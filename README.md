@@ -85,3 +85,10 @@ src/
 npm test           # unit tests for journeyService, geo utils, and the journey store
 npm run compile    # tsc --noEmit
 ```
+
+## Privacy Policy
+
+See [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md) — required if you submit this app to
+the Play Store or App Store, since it requests location and camera permissions. You'll
+need to host this page somewhere with a public URL (e.g. GitHub Pages, or paste its raw
+GitHub URL) to enter into Play Console / App Store Connect.
