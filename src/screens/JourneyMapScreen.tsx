@@ -12,6 +12,7 @@ import { Journey } from '../types/journey';
 import { distanceInMeters } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
+import { useThemeColors } from '../utils/theme';
 
 const getFitCoordinates = (journey: Journey) => [
     { latitude: journey.destination.lat, longitude: journey.destination.lng },
@@ -28,6 +29,7 @@ export default function JourneyMapScreen({ navigation }: any) {
     const { uid } = useAuthStore();
     const { journeyId, role, clear } = useJourneyStore();
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
+    const colors = useThemeColors();
 
     const [journey, setJourney] = useState<Journey | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -142,9 +144,9 @@ export default function JourneyMapScreen({ navigation }: any) {
 
     if (connectionError) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center px-8">
-                <Ionicons name="flag" size={64} color="#9ca3af" />
-                <Text className="text-white text-xl font-bold mt-4 text-center">{connectionError}</Text>
+            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center px-8">
+                <Ionicons name="flag" size={64} color={colors.textSecondary} />
+                <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4 text-center">{connectionError}</Text>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('HomeTabs')}
                     className="mt-8 bg-blue-600 px-8 py-4 rounded-2xl active:bg-blue-700"
@@ -157,9 +159,9 @@ export default function JourneyMapScreen({ navigation }: any) {
 
     if (!journey) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text className="text-gray-400 mt-4">Connecting to journey…</Text>
+                <Text className="text-gray-500 dark:text-gray-400 mt-4">Connecting to journey…</Text>
             </SafeAreaView>
         );
     }
@@ -173,7 +175,7 @@ export default function JourneyMapScreen({ navigation }: any) {
     });
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View style={{ flex: 3 }}>
                 <MapView
                     ref={mapRef}
@@ -213,23 +215,23 @@ export default function JourneyMapScreen({ navigation }: any) {
                 <View className="absolute top-4 right-4 gap-3">
                     <TouchableOpacity
                         onPress={() => setShareVisible(true)}
-                        className="bg-gray-900/90 p-3 rounded-full border border-gray-700"
+                        className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
                     >
                         <Ionicons name="share-outline" size={22} color="#3b82f6" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleRecenter}
-                        className="bg-gray-900/90 p-3 rounded-full border border-gray-700"
+                        className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
                     >
                         <Ionicons name="locate" size={22} color="#3b82f6" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <View style={{ flex: 2 }} className="bg-gray-900 border-t border-gray-800">
+            <View style={{ flex: 2 }} className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
                 <View className="px-4 pt-4 pb-2 flex-row items-center justify-between">
                     <View>
-                        <Text className="text-white text-lg font-black">{journey.destination.name}</Text>
+                        <Text className="text-gray-900 dark:text-white text-lg font-black">{journey.destination.name}</Text>
                         <Text className="text-gray-500 text-xs uppercase tracking-widest">
                             {members.length} {members.length === 1 ? 'member' : 'members'}
                         </Text>

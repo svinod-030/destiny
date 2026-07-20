@@ -19,16 +19,17 @@ export const ShareJourneyCard: React.FC<ShareJourneyCardProps> = ({ journeyId })
     };
 
     return (
-        <View className="bg-gray-800 p-6 rounded-3xl items-center border border-gray-700">
+        <View className="bg-white dark:bg-gray-800 p-6 rounded-3xl items-center border border-gray-200 dark:border-gray-700">
             <Text className="text-gray-500 text-[10px] font-black uppercase mb-4 tracking-[4px]">
                 Journey Code
             </Text>
 
-            <View className="bg-white p-3 rounded-2xl mb-4">
+            {/* Always white, regardless of theme - QR codes need contrast to scan reliably */}
+            <View className="bg-white p-3 rounded-2xl mb-4 border border-gray-200">
                 <QRCode value={journeyId} size={180} />
             </View>
 
-            <Text className="text-white font-black text-3xl tracking-[6px] mb-4">{journeyId}</Text>
+            <Text className="text-gray-900 dark:text-white font-black text-3xl tracking-[6px] mb-4">{journeyId}</Text>
 
             <TouchableOpacity
                 onPress={handleShare}

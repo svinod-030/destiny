@@ -21,6 +21,7 @@ import { useJourneySync } from '../hooks/useJourneySync';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
+import { useThemeColors } from '../utils/theme';
 
 export default function JoinJourneyScreen({ navigation }: any) {
     const [codeInput, setCodeInput] = useState('');
@@ -28,6 +29,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
     const { uid, name } = useAuthStore();
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
+    const colors = useThemeColors();
 
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
@@ -86,7 +88,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
@@ -94,15 +96,15 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             <View className="bg-blue-600/20 p-6 rounded-full mb-6 shadow-2xl">
                                 <Ionicons name="people" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-white text-3xl font-black text-center uppercase tracking-widest">
+                            <Text className="text-gray-900 dark:text-white text-3xl font-black text-center uppercase tracking-widest">
                                 Join a Journey
                             </Text>
-                            <Text className="text-gray-400 text-center mt-4 text-lg leading-6 px-4 font-medium italic">
+                            <Text className="text-gray-500 dark:text-gray-400 text-center mt-4 text-lg leading-6 px-4 font-medium italic">
                                 Enter the journey code your friend shared, or scan their QR code.
                             </Text>
                         </View>
 
-                        <View className="bg-gray-800 p-8 rounded-[40px] border border-gray-700 shadow-2xl mb-6">
+                        <View className="bg-white dark:bg-gray-800 p-8 rounded-[40px] border border-gray-200 dark:border-gray-700 shadow-2xl mb-6">
                             <Text className="text-gray-500 text-[10px] font-black uppercase mb-4 tracking-[4px] ml-1">
                                 Journey Code
                             </Text>
@@ -110,8 +112,8 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 value={codeInput}
                                 onChangeText={setCodeInput}
                                 placeholder="e.g. AB12CD"
-                                placeholderTextColor="#4b5563"
-                                className="bg-gray-900 text-white p-6 rounded-3xl border border-gray-700 font-black text-2xl mb-8 tracking-widest"
+                                placeholderTextColor={colors.placeholder}
+                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-3xl border border-gray-200 dark:border-gray-700 font-black text-2xl mb-8 tracking-widest"
                                 autoCapitalize="characters"
                                 autoCorrect={false}
                                 selectionColor="#3b82f6"
@@ -138,7 +140,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
 
                                 <TouchableOpacity
                                     onPress={handleRequestPermission}
-                                    className="p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed border-gray-600 bg-gray-900/50 active:bg-gray-700"
+                                    className="p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900/50 active:bg-gray-200 dark:active:bg-gray-700"
                                 >
                                     <Ionicons name="qr-code-outline" size={24} color="#3b82f6" />
                                     <Text className="text-blue-500 font-black ml-3 uppercase tracking-widest text-lg">

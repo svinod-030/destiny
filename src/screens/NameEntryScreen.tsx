@@ -12,10 +12,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeColors } from '../utils/theme';
 
 export default function NameEntryScreen() {
     const [input, setInput] = useState('');
     const setName = useAuthStore((state) => state.setName);
+    const colors = useThemeColors();
 
     const handleContinue = () => {
         if (!input.trim()) return;
@@ -23,7 +25,7 @@ export default function NameEntryScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View className="flex-1 justify-center px-8">
@@ -31,8 +33,8 @@ export default function NameEntryScreen() {
                             <View className="bg-blue-600/20 p-6 rounded-full mb-6">
                                 <Ionicons name="compass-outline" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-white text-3xl font-black text-center">Welcome to Destiny</Text>
-                            <Text className="text-gray-400 text-center mt-3 text-base leading-6">
+                            <Text className="text-gray-900 dark:text-white text-3xl font-black text-center">Welcome to Destiny</Text>
+                            <Text className="text-gray-500 dark:text-gray-400 text-center mt-3 text-base leading-6">
                                 What should your group see you as?
                             </Text>
                         </View>
@@ -41,10 +43,10 @@ export default function NameEntryScreen() {
                             value={input}
                             onChangeText={setInput}
                             placeholder="Your name"
-                            placeholderTextColor="#4b5563"
+                            placeholderTextColor={colors.placeholder}
                             autoFocus
                             autoCapitalize="words"
-                            className="bg-gray-800 text-white p-5 rounded-2xl border border-gray-700 text-lg mb-6"
+                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg mb-6"
                             selectionColor="#3b82f6"
                             onSubmitEditing={handleContinue}
                             returnKeyType="done"

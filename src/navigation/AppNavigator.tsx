@@ -1,10 +1,11 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 
 import HomeScreen from '../screens/HomeScreen';
 import JoinJourneyScreen from '../screens/JoinJourneyScreen';
@@ -12,44 +13,39 @@ import JourneyHistoryScreen from '../screens/JourneyHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import JourneyMapScreen from '../screens/JourneyMapScreen';
 import { useJourneyStore } from '../store/useJourneyStore';
+import { useThemeColors } from '../utils/theme';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const LogoTitle = React.memo(() => (
+const LogoTitle = React.memo(({ tint }: { tint: string }) => (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Image
             style={{ width: 36, height: 36, borderRadius: 18 }}
             source={require('../../assets/icon.png')}
             resizeMode="contain"
         />
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Destiny</Text>
+        <Text style={{ color: tint, fontWeight: 'bold', fontSize: 20 }}>Destiny</Text>
     </View>
 ));
 
-const DEFAULT_STACK_OPTIONS = {
-    headerStyle: { backgroundColor: '#111827' },
-    headerTintColor: '#fff',
-    headerTitleStyle: { fontWeight: 'bold' as const },
-    headerTitle: (props: any) => <LogoTitle {...props} />,
-    contentStyle: { backgroundColor: '#111827' },
-};
-
 function HomeTabs() {
+    const colors = useThemeColors();
+
     return (
         <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-            <View style={{ flex: 1, backgroundColor: '#1F2937' }}>
+            <View style={{ flex: 1, backgroundColor: colors.tabBarBackground }}>
                 <Tab.Navigator
                     screenOptions={({ route }) => ({
                         headerShown: false,
                         tabBarStyle: {
-                            backgroundColor: '#1F2937',
-                            borderTopColor: '#374151',
+                            backgroundColor: colors.tabBarBackground,
+                            borderTopColor: colors.tabBarBorder,
                             elevation: 0,
                             paddingTop: 5,
                         },
-                        tabBarActiveTintColor: '#3B82F6',
-                        tabBarInactiveTintColor: '#9CA3AF',
+                        tabBarActiveTintColor: colors.tabActive,
+                        tabBarInactiveTintColor: colors.tabInactive,
                         tabBarIcon: ({ focused, color, size }) => {
                             let iconName: keyof typeof Ionicons.glyphMap = 'navigate-outline';
                             if (route.name === 'Start') iconName = focused ? 'navigate' : 'navigate-outline';
@@ -74,11 +70,31 @@ export default function AppNavigator() {
     // If a journey was active when the app last closed, jump straight back into it.
     // (Best-effort: if AsyncStorage hasn't finished rehydrating yet, this falls back to HomeTabs.)
     const journeyId = useJourneyStore((state) => state.journeyId);
+    const colors = useThemeColors();
+    const { colorScheme } = useColorScheme();
+
+    const stackOptions = {
+        headerStyle: { backgroundColor: colors.headerBackground },
+        headerTintColor: colors.headerTint,
+        headerTitleStyle: { fontWeight: 'bold' as const },
+        headerTitle: () => <LogoTitle tint={colors.headerTint} />,
+        contentStyle: { backgroundColor: colors.background },
+    };
+
+    const navigationTheme = {
+        ...(colorScheme === 'light' ? DefaultTheme : DarkTheme),
+        colors: {
+            ...(colorScheme === 'light' ? DefaultTheme.colors : DarkTheme.colors),
+            background: colors.background,
+            card: colors.headerBackground,
+            border: colors.border,
+        },
+    };
 
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={navigationTheme}>
             <Stack.Navigator
-                screenOptions={DEFAULT_STACK_OPTIONS}
+                screenOptions={stackOptions}
                 initialRouteName={journeyId ? 'JourneyMap' : 'HomeTabs'}
             >
                 <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ title: '' }} />

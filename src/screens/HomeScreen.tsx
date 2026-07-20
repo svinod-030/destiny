@@ -9,6 +9,7 @@ import { placesService, PlaceSuggestion } from '../services/placesService';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
+import { useThemeColors } from '../utils/theme';
 
 const DEFAULT_REGION = {
     latitude: 12.9716,
@@ -36,6 +37,7 @@ export default function HomeScreen({ navigation }: any) {
     const { uid, name } = useAuthStore();
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
+    const colors = useThemeColors();
 
     // A pin the user picked (via search or long-press) always wins over the slow
     // GPS fix below - track it in a ref so the async effect can see the latest
@@ -196,14 +198,14 @@ export default function HomeScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View className="px-4 pt-4 pb-2">
-                <Text className="text-white text-2xl font-black">Start a Journey</Text>
-                <Text className="text-gray-400 mt-1">Search the map or long-press to drop a pin</Text>
+                <Text className="text-gray-900 dark:text-white text-2xl font-black">Start a Journey</Text>
+                <Text className="text-gray-500 dark:text-gray-400 mt-1">Search the map or long-press to drop a pin</Text>
             </View>
 
             <View className="flex-1 mx-4">
-                <View className="flex-1 rounded-3xl overflow-hidden border border-gray-700">
+                <View className="flex-1 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-700">
                     <MapView
                         ref={mapRef}
                         style={{ flex: 1 }}
@@ -223,8 +225,8 @@ export default function HomeScreen({ navigation }: any) {
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             placeholder="Search for a destination"
-                            placeholderTextColor="#6b7280"
-                            className="flex-1 bg-gray-900 text-white p-4 rounded-2xl border border-gray-700"
+                            placeholderTextColor={colors.placeholder}
+                            className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
                             style={{
                                 shadowColor: '#000',
                                 shadowOpacity: 0.3,
@@ -258,7 +260,7 @@ export default function HomeScreen({ navigation }: any) {
 
                     {suggestions.length > 0 && (
                         <View
-                            className="mt-2 bg-gray-900 rounded-2xl border border-gray-700 overflow-hidden"
+                            className="mt-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
                             style={{
                                 shadowColor: '#000',
                                 shadowOpacity: 0.3,
@@ -271,12 +273,12 @@ export default function HomeScreen({ navigation }: any) {
                                 <TouchableOpacity
                                     key={item.placeId}
                                     onPress={() => handleSelectSuggestion(item)}
-                                    className={`px-4 py-3 flex-row items-center active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-700' : ''
+                                    className={`px-4 py-3 flex-row items-center active:bg-gray-100 dark:active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
                                         }`}
                                 >
                                     <Ionicons name="location-outline" size={18} color="#3b82f6" />
                                     <View className="ml-3 flex-1">
-                                        <Text className="text-white font-semibold" numberOfLines={1}>
+                                        <Text className="text-gray-900 dark:text-white font-semibold" numberOfLines={1}>
                                             {item.primaryText}
                                         </Text>
                                         {!!item.secondaryText && (
@@ -298,8 +300,8 @@ export default function HomeScreen({ navigation }: any) {
                         value={destinationName}
                         onChangeText={setDestinationName}
                         placeholder="Name this destination (optional)"
-                        placeholderTextColor="#4b5563"
-                        className="bg-gray-800 text-white p-4 rounded-2xl border border-gray-700 mb-3"
+                        placeholderTextColor={colors.placeholder}
+                        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700 mb-3"
                     />
                 )}
 
