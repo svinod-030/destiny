@@ -63,6 +63,14 @@ jobs:
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode --ignore-garbage > $RUNNER_TEMP/release.keystore
 
+      - name: Verify keystore credentials
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          keytool -list -keystore "$RUNNER_TEMP/release.keystore" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" \
+            || (echo "::error::KEYSTORE_BASE64, KEYSTORE_PASSWORD, or KEY_ALIAS does not match this keystore. See the fix steps in the chat/README." && exit 1)
+
       - name: Build APK
         if: ${{ github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both' }}
         env:
