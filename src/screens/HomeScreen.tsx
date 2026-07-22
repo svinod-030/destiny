@@ -26,12 +26,12 @@ export default function HomeScreen({ navigation }: any) {
     const pinRef = useRef<{ latitude: number; longitude: number } | null>(null);
     const currentLocationRef = useRef<{ lat: number; lng: number } | null>(null);
     const sessionTokenRef = useRef(placesService.newSessionToken());
+    const suppressAutocompleteRef = useRef(false);
 
     const [pin, setPin] = useState<{ latitude: number; longitude: number } | null>(null);
     const [destinationName, setDestinationName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isSearching, setIsSearching] = useState(false);
     const [showsUserLocation, setShowsUserLocation] = useState(false);
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
     const { uid, name } = useAuthStore();
@@ -77,6 +77,11 @@ export default function HomeScreen({ navigation }: any) {
     // Places API key is configured - the search button below still works via
     // plain geocoding either way.
     useEffect(() => {
+        if (suppressAutocompleteRef.current) {
+            suppressAutocompleteRef.current = false;
+            return;
+        }
+
         if (!placesService.isConfigured()) return;
 
         const query = searchQuery.trim();
@@ -101,9 +106,20 @@ export default function HomeScreen({ navigation }: any) {
         return () => clearTimeout(timeout);
     }, [searchQuery]);
 
-    const handleLongPress = (event: LongPressEvent) => {
+    const handleLongPress = async (event: LongPressEvent) => {
         setSuggestions([]);
-        setPinAndRef(event.nativeEvent.coordinate);
+        const { coordinate } = event.nativeEvent;
+        setDestinationName('');
+        setPinAndRef(coordinate);
+        try {
+            const [place] = await Location.reverseGeocodeAsync(coordinate);
+            if (place) {
+                const label = [place.name, place.street, place.city].filter(Boolean).join(', ');
+                if (label) setDestinationName(label);
+            }
+        } catch (error) {
+            console.error('Reverse geocode failed:', error);
+        }
     };
 
     const focusOnCoordinate = (latitude: number, longitude: number) => {
@@ -119,8 +135,8 @@ export default function HomeScreen({ navigation }: any) {
     const handleSelectSuggestion = async (suggestion: PlaceSuggestion) => {
         Keyboard.dismiss();
         setSuggestions([]);
+        suppressAutocompleteRef.current = true;
         setSearchQuery(suggestion.primaryText);
-        setIsSearching(true);
         try {
             const details = await placesService.getPlaceDetails(suggestion.placeId, sessionTokenRef.current);
             sessionTokenRef.current = placesService.newSessionToken();
@@ -130,8 +146,6 @@ export default function HomeScreen({ navigation }: any) {
         } catch (error) {
             console.error('Failed to resolve place:', error);
             Alert.alert('Error', 'Could not load that place. Please try again.');
-        } finally {
-            setIsSearching(false);
         }
     };
 
@@ -141,7 +155,6 @@ export default function HomeScreen({ navigation }: any) {
 
         Keyboard.dismiss();
         setSuggestions([]);
-        setIsSearching(true);
         try {
             const results = await Location.geocodeAsync(query);
             if (results.length === 0) {
@@ -156,8 +169,6 @@ export default function HomeScreen({ navigation }: any) {
         } catch (error) {
             console.error('Search failed:', error);
             Alert.alert('Error', 'Could not search for that location. Please try again.');
-        } finally {
-            setIsSearching(false);
         }
     };
 
@@ -220,43 +231,22 @@ export default function HomeScreen({ navigation }: any) {
 
                 {/* Floating search, overlaid on the map like the Google Maps app */}
                 <View className="absolute top-3 left-3 right-3">
-                    <View className="flex-row gap-2">
-                        <TextInput
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search for a destination"
-                            placeholderTextColor={colors.placeholder}
-                            className="flex-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
-                            style={{
-                                shadowColor: '#000',
-                                shadowOpacity: 0.3,
-                                shadowRadius: 8,
-                                shadowOffset: { width: 0, height: 2 },
-                                elevation: 4,
-                            }}
-                            returnKeyType="search"
-                            onSubmitEditing={handleSearch}
-                        />
-                        <TouchableOpacity
-                            onPress={handleSearch}
-                            disabled={isSearching || !searchQuery.trim()}
-                            className={`w-14 items-center justify-center rounded-2xl ${isSearching || !searchQuery.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
-                                }`}
-                            style={{
-                                shadowColor: '#000',
-                                shadowOpacity: 0.3,
-                                shadowRadius: 8,
-                                shadowOffset: { width: 0, height: 2 },
-                                elevation: 4,
-                            }}
-                        >
-                            {isSearching ? (
-                                <ActivityIndicator color="#fff" size="small" />
-                            ) : (
-                                <Ionicons name="search" size={22} color="#fff" />
-                            )}
-                        </TouchableOpacity>
-                    </View>
+                    <TextInput
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder="Search for a destination"
+                        placeholderTextColor={colors.placeholder}
+                        className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOpacity: 0.3,
+                            shadowRadius: 8,
+                            shadowOffset: { width: 0, height: 2 },
+                            elevation: 4,
+                        }}
+                        returnKeyType="search"
+                        onSubmitEditing={handleSearch}
+                    />
 
                     {suggestions.length > 0 && (
                         <View
@@ -296,13 +286,15 @@ export default function HomeScreen({ navigation }: any) {
 
             <View className="p-4">
                 {pin && (
-                    <TextInput
-                        value={destinationName}
-                        onChangeText={setDestinationName}
-                        placeholder="Name this destination (optional)"
-                        placeholderTextColor={colors.placeholder}
-                        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700 mb-3"
-                    />
+                    <View className="flex-row items-center mb-3 px-1">
+                        <Ionicons name="location" size={18} color="#3b82f6" />
+                        <Text
+                            className="text-gray-900 dark:text-white ml-2 text-base font-medium flex-1"
+                            numberOfLines={1}
+                        >
+                            {destinationName.trim() || 'Destination'}
+                        </Text>
+                    </View>
                 )}
 
                 <TouchableOpacity
