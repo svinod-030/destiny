@@ -51,7 +51,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Destiny to access your location to share it with your journey group."
+          "locationWhenInUsePermission": "Allow Destiny to access your location to share it with your journey group.",
+          "locationAlwaysAndWhenInUsePermission": "Allow Destiny to access your location so your group can keep seeing your live position even when you switch to another app during a journey.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": true
         }
       ],
       "expo-font"

@@ -36,7 +36,11 @@ export default function JourneyMapScreen({ navigation }: any) {
     const [shareVisible, setShareVisible] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
 
-    const { permissionDenied } = useLiveLocation({ journeyId, memberId: uid, enabled: !!journeyId });
+    const { permissionDenied, showBackgroundPrompt, enableBackgroundTracking, dismissBackgroundPrompt } = useLiveLocation({
+        journeyId,
+        memberId: uid,
+        enabled: !!journeyId,
+    });
 
     useEffect(() => {
         if (!journeyId) return;
@@ -87,6 +91,19 @@ export default function JourneyMapScreen({ navigation }: any) {
             );
         }
     }, [permissionDenied]);
+
+    useEffect(() => {
+        if (!showBackgroundPrompt) return;
+        Alert.alert(
+            'Keep sharing while you multitask?',
+            "Allow Destiny to access your location ‘Always’ so your group can keep seeing your live position even if you switch to another app, like Maps for directions. Otherwise, your location will only update while Destiny is open.",
+            [
+                { text: 'Not Now', style: 'cancel', onPress: dismissBackgroundPrompt },
+                { text: 'Enable', onPress: () => enableBackgroundTracking() },
+            ]
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showBackgroundPrompt]);
 
     const handleRecenter = () => {
         if (!journey) return;

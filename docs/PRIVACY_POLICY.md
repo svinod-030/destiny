@@ -1,6 +1,6 @@
 # Privacy Policy for Destiny
 
-**Last Updated:** July 20, 2026
+**Last Updated:** July 22, 2026
 
 Destiny is a free app that lets a group of people share their live location with each other on the way to a shared destination. This page explains what data Destiny collects, how it's used, and how it's shared, so you can decide whether to use the app.
 
@@ -14,8 +14,9 @@ The first time you open Destiny, you're asked for a display name — just so the
 ### Location Data
 While you're actively part of a journey (from the moment you create or join one, until you leave or it ends), Destiny reads your device's GPS location and shares it with the other members of that same journey so everyone can see each other's position and distance to the destination on a live map.
 
-- Location is only tracked **while the app is open and in the foreground** — it stops as soon as you background or close the app, and Destiny never asks for "Always Allow" background location access.
-- Location is **not tracked at all** unless you are actively in a journey.
+- By default, location is only tracked **while the app is open and in the foreground** — it stops as soon as you background or close the app.
+- When you start or join a journey, you're asked whether to allow "Always" (background) location access so your position keeps updating for the group even while you're using another app, like Maps for directions. This is optional: if you decline or only grant "While Using the App," Destiny falls back to foreground-only tracking with no loss of functionality besides that pause when backgrounded.
+- Location is **not tracked at all** unless you are actively in a journey, and any background tracking stops the moment you leave or end that journey.
 - Your location is visible only to the other members of the same journey (identified by a private journey code), never published or made visible to anyone else.
 
 ### Device Identifier

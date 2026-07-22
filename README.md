@@ -15,8 +15,12 @@ session, `onSnapshot` for real-time sync, and a join-by-code/QR flow.
   app. Under the hood, Firebase Anonymous Auth silently gives your device a stable ID so
   the group can tell members apart and Firestore rules can stop anyone from spoofing
   someone else's location.
-- Location sharing is **foreground-only**: it updates while the app is open, and pauses
-  when it's backgrounded. No "Always Allow" location permission is needed.
+- Location sharing is **foreground-only by default**: it updates while the app is open,
+  and pauses when it's backgrounded. When you start or join a journey, you're prompted
+  once to optionally allow "Always" (background) access, which keeps your position
+  updating for the group even while you're using another app (e.g. Maps for turn-by-turn
+  directions). Declining just falls back to foreground-only — no functionality is lost,
+  your marker simply stops updating while backgrounded, same as before.
 - Ending a journey (or Firestore losing the code) simply removes the document; every
   connected device notices and shows a "journey ended" screen.
 

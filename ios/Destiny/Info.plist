@@ -49,15 +49,19 @@
     <key>NSCameraUsageDescription</key>
     <string>Allow Destiny to access your camera to scan journey QR codes.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>Allow Destiny to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>Allow Destiny to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Allow Destiny to access your location to share it with your journey group.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>RCTNewArchEnabled</key>
     <true/>
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>location</string>
+    </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>

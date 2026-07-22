@@ -6,6 +6,7 @@ import NameEntryScreen from './src/screens/NameEntryScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
+import './src/tasks/locationTask';
 
 export default function App() {
   const isReady = useAuthStore((state) => state.isReady);
