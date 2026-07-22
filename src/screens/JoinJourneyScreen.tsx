@@ -93,18 +93,18 @@ export default function JoinJourneyScreen({ navigation }: any) {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
                         <View className="items-center mt-10 mb-10">
-                            <View className="bg-blue-600/20 p-6 rounded-full mb-6 shadow-2xl">
+                            <View className="bg-blue-600/20 p-6 rounded-full mb-6">
                                 <Ionicons name="people" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center uppercase tracking-widest">
+                            <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center">
                                 Join a Journey
                             </Text>
-                            <Text className="text-gray-500 dark:text-gray-400 text-center mt-4 text-lg leading-6 px-4 font-medium italic">
+                            <Text className="text-gray-500 dark:text-gray-400 text-center mt-3 text-base leading-6 px-4">
                                 Enter the journey code your friend shared, or scan their QR code.
                             </Text>
                         </View>
 
-                        <View className="bg-white dark:bg-gray-800 p-8 rounded-[40px] border border-gray-200 dark:border-gray-700 shadow-2xl mb-6">
+                        <View className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-200 dark:border-gray-700 mb-6">
                             <Text className="text-gray-500 text-[10px] font-bold uppercase mb-4 tracking-[4px] ml-1">
                                 Journey Code
                             </Text>
@@ -113,25 +113,25 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 onChangeText={setCodeInput}
                                 placeholder="e.g. AB12CD"
                                 placeholderTextColor={colors.placeholder}
-                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-3xl border border-gray-200 dark:border-gray-700 font-bold text-2xl mb-8 tracking-widest"
+                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 font-bold text-2xl mb-6 tracking-widest"
                                 autoCapitalize="characters"
                                 autoCorrect={false}
                                 selectionColor="#3b82f6"
                             />
 
-                            <View className="gap-4">
+                            <View className="gap-3">
                                 <TouchableOpacity
                                     onPress={() => handleJoin()}
                                     disabled={isLoading || !codeInput.trim()}
-                                    className={`p-6 rounded-3xl items-center flex-row justify-center shadow-lg ${isLoading || !codeInput.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700 shadow-blue-500/20'
+                                    className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
                                         }`}
                                 >
                                     {isLoading ? (
                                         <ActivityIndicator color="white" />
                                     ) : (
                                         <>
-                                            <Ionicons name="play" size={24} color="#fff" />
-                                            <Text className="text-white font-bold ml-3 uppercase tracking-widest text-lg">
+                                            <Ionicons name="play" size={20} color="#fff" />
+                                            <Text className="text-white font-bold ml-3 uppercase tracking-widest">
                                                 Join
                                             </Text>
                                         </>
@@ -140,17 +140,17 @@ export default function JoinJourneyScreen({ navigation }: any) {
 
                                 <TouchableOpacity
                                     onPress={handleRequestPermission}
-                                    className="p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900/50 active:bg-gray-200 dark:active:bg-gray-700"
+                                    className="p-5 rounded-2xl items-center flex-row justify-center border border-dashed border-gray-300 dark:border-gray-600 active:bg-gray-100 dark:active:bg-gray-700"
                                 >
-                                    <Ionicons name="qr-code-outline" size={24} color="#3b82f6" />
-                                    <Text className="text-blue-500 font-bold ml-3 uppercase tracking-widest text-lg">
+                                    <Ionicons name="qr-code-outline" size={20} color="#3b82f6" />
+                                    <Text className="text-blue-500 font-bold ml-3 uppercase tracking-widest">
                                         Scan QR
                                     </Text>
                                 </TouchableOpacity>
                             </View>
 
                             {error && (
-                                <View className="mt-8 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 flex-row items-center justify-center">
+                                <View className="mt-6 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 flex-row items-center justify-center">
                                     <Ionicons name="alert-circle" size={20} color="#ef4444" />
                                     <Text className="text-red-500 font-bold ml-2 text-sm">{error}</Text>
                                 </View>
