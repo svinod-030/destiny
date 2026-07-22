@@ -151,7 +151,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                     onPress={() => navigation.navigate('HomeTabs')}
                     className="mt-8 bg-blue-600 px-8 py-4 rounded-2xl active:bg-blue-700"
                 >
-                    <Text className="text-white font-black uppercase tracking-widest">Back Home</Text>
+                    <Text className="text-white font-bold uppercase tracking-widest">Back Home</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         );
@@ -204,7 +204,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                                     style={{ backgroundColor: m.color }}
                                     className="w-8 h-8 rounded-full items-center justify-center border-2 border-white"
                                 >
-                                    <Text className="text-white font-black text-xs">
+                                    <Text className="text-white font-bold text-xs">
                                         {m.name.charAt(0).toUpperCase()}
                                     </Text>
                                 </View>
@@ -231,7 +231,7 @@ export default function JourneyMapScreen({ navigation }: any) {
             <View style={{ flex: 2 }} className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
                 <View className="px-4 pt-4 pb-2 flex-row items-center justify-between">
                     <View>
-                        <Text className="text-gray-900 dark:text-white text-lg font-black">{journey.destination.name}</Text>
+                        <Text className="text-gray-900 dark:text-white text-lg font-bold">{journey.destination.name}</Text>
                         <Text className="text-gray-500 text-xs uppercase tracking-widest">
                             {members.length} {members.length === 1 ? 'member' : 'members'}
                         </Text>

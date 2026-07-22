@@ -33,7 +33,7 @@ export default function NameEntryScreen() {
                             <View className="bg-blue-600/20 p-6 rounded-full mb-6">
                                 <Ionicons name="compass-outline" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-gray-900 dark:text-white text-3xl font-black text-center">Welcome to Destiny</Text>
+                            <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center">Welcome to Destiny</Text>
                             <Text className="text-gray-500 dark:text-gray-400 text-center mt-3 text-base leading-6">
                                 What should your group see you as?
                             </Text>
@@ -58,7 +58,7 @@ export default function NameEntryScreen() {
                             className={`p-5 rounded-2xl items-center ${input.trim() ? 'bg-blue-600 active:bg-blue-700' : 'bg-blue-600/30'
                                 }`}
                         >
-                            <Text className="text-white font-black uppercase tracking-widest">Continue</Text>
+                            <Text className="text-white font-bold uppercase tracking-widest">Continue</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableWithoutFeedback>

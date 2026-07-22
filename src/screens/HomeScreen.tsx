@@ -200,7 +200,7 @@ export default function HomeScreen({ navigation }: any) {
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View className="px-4 pt-4 pb-2">
-                <Text className="text-gray-900 dark:text-white text-2xl font-black">Start a Journey</Text>
+                <Text className="text-gray-900 dark:text-white text-2xl font-bold">Start a Journey</Text>
                 <Text className="text-gray-500 dark:text-gray-400 mt-1">Search the map or long-press to drop a pin</Text>
             </View>
 
@@ -316,7 +316,7 @@ export default function HomeScreen({ navigation }: any) {
                     ) : (
                         <>
                             <Ionicons name="navigate" size={20} color="#fff" />
-                            <Text className="text-white font-black ml-2 uppercase tracking-widest">
+                            <Text className="text-white font-bold ml-2 uppercase tracking-widest">
                                 Start Journey
                             </Text>
                         </>

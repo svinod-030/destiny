@@ -23,7 +23,7 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
                 style={{ backgroundColor: member.color }}
                 className="w-10 h-10 rounded-full items-center justify-center mr-3"
             >
-                <Text className="text-white font-black">{member.name.charAt(0).toUpperCase()}</Text>
+                <Text className="text-white font-bold">{member.name.charAt(0).toUpperCase()}</Text>
             </View>
             <View className="flex-1">
                 <Text className="text-gray-900 dark:text-white font-bold text-base">

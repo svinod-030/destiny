@@ -75,7 +75,7 @@ export default function JourneyHistoryScreen({ navigation }: any) {
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View className="px-4 pt-4 pb-2">
-                <Text className="text-gray-900 dark:text-white text-2xl font-black">Journeys</Text>
+                <Text className="text-gray-900 dark:text-white text-2xl font-bold">Journeys</Text>
             </View>
 
             {entries.length === 0 ? (

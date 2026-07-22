@@ -35,10 +35,10 @@ export default function SettingsScreen() {
                         <View className="bg-blue-600/20 p-6 rounded-full mb-4">
                             <Ionicons name="person-circle-outline" size={60} color="#3b82f6" />
                         </View>
-                        <Text className="text-gray-900 dark:text-white text-2xl font-black">Settings</Text>
+                        <Text className="text-gray-900 dark:text-white text-2xl font-bold">Settings</Text>
                     </View>
 
-                    <Text className="text-gray-500 text-[10px] font-black uppercase mb-2 tracking-[3px] ml-1">
+                    <Text className="text-gray-500 text-[10px] font-bold uppercase mb-2 tracking-[3px] ml-1">
                         Display Name
                     </Text>
                     <TextInput
@@ -55,10 +55,10 @@ export default function SettingsScreen() {
                         onPress={handleSave}
                         className="bg-blue-600 p-5 rounded-2xl items-center active:bg-blue-700 mb-10"
                     >
-                        <Text className="text-white font-black uppercase tracking-widest">Save</Text>
+                        <Text className="text-white font-bold uppercase tracking-widest">Save</Text>
                     </TouchableOpacity>
 
-                    <Text className="text-gray-500 text-[10px] font-black uppercase mb-2 tracking-[3px] ml-1">
+                    <Text className="text-gray-500 text-[10px] font-bold uppercase mb-2 tracking-[3px] ml-1">
                         Appearance
                     </Text>
                     <View className="flex-row gap-3">

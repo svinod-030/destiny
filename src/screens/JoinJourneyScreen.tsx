@@ -96,7 +96,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             <View className="bg-blue-600/20 p-6 rounded-full mb-6 shadow-2xl">
                                 <Ionicons name="people" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-gray-900 dark:text-white text-3xl font-black text-center uppercase tracking-widest">
+                            <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center uppercase tracking-widest">
                                 Join a Journey
                             </Text>
                             <Text className="text-gray-500 dark:text-gray-400 text-center mt-4 text-lg leading-6 px-4 font-medium italic">
@@ -105,7 +105,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                         </View>
 
                         <View className="bg-white dark:bg-gray-800 p-8 rounded-[40px] border border-gray-200 dark:border-gray-700 shadow-2xl mb-6">
-                            <Text className="text-gray-500 text-[10px] font-black uppercase mb-4 tracking-[4px] ml-1">
+                            <Text className="text-gray-500 text-[10px] font-bold uppercase mb-4 tracking-[4px] ml-1">
                                 Journey Code
                             </Text>
                             <TextInput
@@ -113,7 +113,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 onChangeText={setCodeInput}
                                 placeholder="e.g. AB12CD"
                                 placeholderTextColor={colors.placeholder}
-                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-3xl border border-gray-200 dark:border-gray-700 font-black text-2xl mb-8 tracking-widest"
+                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-6 rounded-3xl border border-gray-200 dark:border-gray-700 font-bold text-2xl mb-8 tracking-widest"
                                 autoCapitalize="characters"
                                 autoCorrect={false}
                                 selectionColor="#3b82f6"
@@ -131,7 +131,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                     ) : (
                                         <>
                                             <Ionicons name="play" size={24} color="#fff" />
-                                            <Text className="text-white font-black ml-3 uppercase tracking-widest text-lg">
+                                            <Text className="text-white font-bold ml-3 uppercase tracking-widest text-lg">
                                                 Join
                                             </Text>
                                         </>
@@ -143,7 +143,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                     className="p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-900/50 active:bg-gray-200 dark:active:bg-gray-700"
                                 >
                                     <Ionicons name="qr-code-outline" size={24} color="#3b82f6" />
-                                    <Text className="text-blue-500 font-black ml-3 uppercase tracking-widest text-lg">
+                                    <Text className="text-blue-500 font-bold ml-3 uppercase tracking-widest text-lg">
                                         Scan QR
                                     </Text>
                                 </TouchableOpacity>
