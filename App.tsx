@@ -1,12 +1,24 @@
 import "./global.css";
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import * as Notifications from 'expo-notifications';
 import AppNavigator from './src/navigation/AppNavigator';
 import NameEntryScreen from './src/screens/NameEntryScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
 import './src/tasks/locationTask';
+
+// Ensures the "journey in progress" notification stays visible even if the
+// user briefly reopens the app while background tracking is active.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function App() {
   const isReady = useAuthStore((state) => state.isReady);

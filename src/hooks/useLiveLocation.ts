@@ -6,6 +6,7 @@ import {
     setBackgroundLocationTarget,
     clearBackgroundLocationTarget,
 } from '../tasks/locationTask';
+import { showJourneyNotification, dismissJourneyNotification } from '../utils/journeyNotification';
 
 interface UseLiveLocationOptions {
     journeyId: string | null;
@@ -31,6 +32,7 @@ const startBackgroundUpdates = async (journeyId: string, memberId: string) => {
             notificationBody: 'Your group can see your live position for this journey.',
         },
     });
+    await showJourneyNotification();
 };
 
 // Foreground-only by default (updates pause while the app is backgrounded, so no
@@ -87,6 +89,7 @@ export const useLiveLocation = ({ journeyId, memberId, enabled }: UseLiveLocatio
             subscriptionRef.current?.remove();
             subscriptionRef.current = null;
             clearBackgroundLocationTarget().catch(() => { });
+            dismissJourneyNotification();
             Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)
                 .then((started) => {
                     if (started) return Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);

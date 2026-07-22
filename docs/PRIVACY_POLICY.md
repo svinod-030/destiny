@@ -16,7 +16,8 @@ While you're actively part of a journey (from the moment you create or join one,
 
 - By default, location is only tracked **while the app is open and in the foreground** — it stops as soon as you background or close the app.
 - When you start or join a journey, you're asked whether to allow "Always" (background) location access so your position keeps updating for the group even while you're using another app, like Maps for directions. This is optional: if you decline or only grant "While Using the App," Destiny falls back to foreground-only tracking with no loss of functionality besides that pause when backgrounded.
-- Location is **not tracked at all** unless you are actively in a journey, and any background tracking stops the moment you leave or end that journey.
+- Whenever background tracking is active, Destiny shows a persistent notification ("Journey in progress") for as long as it's happening, so it's never hidden from you.
+- Location is **not tracked at all** unless you are actively in a journey, and any background tracking stops the moment you leave or end that journey (which also removes the notification).
 - Your location is visible only to the other members of the same journey (identified by a private journey code), never published or made visible to anyone else.
 
 ### Device Identifier
