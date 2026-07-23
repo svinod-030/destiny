@@ -11,4 +11,15 @@
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.turbomodule.** { *; }
 
+# expo-task-manager / expo-notifications ship their own proguard-rules.pro but don't
+# wire it up via consumerProguardFiles, so it isn't picked up automatically - inlined here.
+-keep class expo.modules.taskManager.** { *; }
+-keep class expo.modules.notifications.** { *; }
+
+# react-native-maps (Google Maps SDK) - standard rules from Google/react-native-maps docs.
+-keep class com.google.android.gms.maps.** { *; }
+-keep interface com.google.android.gms.maps.** { *; }
+-keep class com.google.android.gms.internal.maps_dyn.** { *; }
+-keep class com.google.android.gms.dynamic.** { *; }
+
 # Add any project specific keep options here:
