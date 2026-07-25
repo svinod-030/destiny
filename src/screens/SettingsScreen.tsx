@@ -1,16 +1,45 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore, ThemePreference } from '../store/useThemeStore';
 import { useThemeColors } from '../utils/theme';
+import { APP_CONFIG } from '../utils/constants';
 
 const APPEARANCE_OPTIONS: { value: ThemePreference; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { value: 'light', label: 'Light', icon: 'sunny-outline' },
     { value: 'dark', label: 'Dark', icon: 'moon-outline' },
     { value: 'system', label: 'System', icon: 'phone-portrait-outline' },
 ];
+
+const SettingItem = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
+    color = '#3b82f6',
+}: {
+    icon: keyof typeof Ionicons.glyphMap;
+    title: string;
+    subtitle?: string;
+    onPress: () => void;
+    color?: string;
+}) => (
+    <TouchableOpacity
+        onPress={onPress}
+        className="flex-row items-center bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 mb-3 active:bg-gray-100 dark:active:bg-gray-700"
+    >
+        <View className="w-10 h-10 rounded-full items-center justify-center mr-4" style={{ backgroundColor: `${color}20` }}>
+            <Ionicons name={icon} size={20} color={color} />
+        </View>
+        <View className="flex-1">
+            <Text className="text-gray-900 dark:text-white font-semibold text-base">{title}</Text>
+            {subtitle && <Text className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{subtitle}</Text>}
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+    </TouchableOpacity>
+);
 
 export default function SettingsScreen() {
     const { name, setName } = useAuthStore();
@@ -27,10 +56,18 @@ export default function SettingsScreen() {
         Alert.alert('Saved', 'Your display name has been updated.');
     };
 
+    const handleRateApp = () => {
+        Linking.openURL(APP_CONFIG.STORE_URL_ANDROID);
+    };
+
+    const handleContactUs = () => {
+        Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=Destiny Support ${APP_CONFIG.APP_VERSION}`);
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-                <View className="px-6 pt-8">
+                <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 }}>
                     <View className="items-center mb-8">
                         <View className="bg-blue-600/20 p-6 rounded-full mb-4">
                             <Ionicons name="person-circle-outline" size={60} color="#3b82f6" />
@@ -88,7 +125,31 @@ export default function SettingsScreen() {
                             );
                         })}
                     </View>
-                </View>
+
+                    <Text className="text-gray-500 text-[10px] font-bold uppercase mb-2 mt-8 tracking-[3px] ml-1">
+                        App
+                    </Text>
+                    <SettingItem
+                        icon="star"
+                        title="Rate App"
+                        subtitle="Rate us on the Play Store"
+                        onPress={handleRateApp}
+                        color="#f59e0b"
+                    />
+                    <SettingItem
+                        icon="chatbubble-ellipses"
+                        title="Contact Us"
+                        subtitle="Support and feedback"
+                        onPress={handleContactUs}
+                    />
+
+                    <View className="items-center mt-6">
+                        <Text className="text-gray-500 dark:text-gray-400 font-bold text-base">Destiny</Text>
+                        <Text className="text-gray-400 dark:text-gray-600 text-sm mt-1">
+                            Version {APP_CONFIG.APP_VERSION}
+                        </Text>
+                    </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

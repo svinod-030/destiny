@@ -1,12 +1,14 @@
 import "./global.css";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AppNavigator from './src/navigation/AppNavigator';
 import NameEntryScreen from './src/screens/NameEntryScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import UpdateModal from './src/components/UpdateModal';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
+import { checkVersion } from './src/utils/versionCheckService';
 import './src/tasks/locationTask';
 
 // Ensures the "journey in progress" notification stays visible even if the
@@ -27,9 +29,22 @@ export default function App() {
   const hasSeenOnboarding = useOnboardingStore((state) => state.hasSeenOnboarding);
   const markOnboardingSeen = useOnboardingStore((state) => state.markSeen);
 
+  const [storeVersion, setStoreVersion] = useState('');
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    checkVersion().then((result) => {
+      if (result.isUpdateAvailable) {
+        setStoreVersion(result.storeVersion);
+        setShowUpdateModal(true);
+      }
+    });
+  }, [isReady]);
 
   if (!isReady) {
     return (
@@ -39,13 +54,20 @@ export default function App() {
     );
   }
 
-  if (!hasSeenOnboarding) {
-    return <OnboardingScreen onDone={markOnboardingSeen} />;
-  }
-
-  if (!name) {
-    return <NameEntryScreen />;
-  }
-
-  return <AppNavigator />;
+  return (
+    <>
+      {!hasSeenOnboarding ? (
+        <OnboardingScreen onDone={markOnboardingSeen} />
+      ) : !name ? (
+        <NameEntryScreen />
+      ) : (
+        <AppNavigator />
+      )}
+      <UpdateModal
+        visible={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        storeVersion={storeVersion}
+      />
+    </>
+  );
 }
