@@ -12,6 +12,8 @@ export interface JourneyMember {
     lat: number | null;
     lng: number | null;
     heading?: number | null;
+    hasArrived?: boolean;
+    arrivedAt?: string | null;
     updatedAt: string | null;
 }
 

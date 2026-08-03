@@ -40,6 +40,8 @@ export const journeyService = {
             lat: null,
             lng: null,
             heading: null,
+            hasArrived: false,
+            arrivedAt: null,
             updatedAt: null,
         };
 
@@ -78,6 +80,8 @@ export const journeyService = {
                 lat: null,
                 lng: null,
                 heading: null,
+                hasArrived: false,
+                arrivedAt: null,
                 updatedAt: null,
             };
 
@@ -93,25 +97,34 @@ export const journeyService = {
     },
 
     /**
-     * Updates the calling member's own location within a journey.
+     * Updates the calling member's own location within a journey. `hasArrived` is
+     * one-way (once true, later calls with `false` never clear it) - it marks the
+     * one-time "reached the destination" milestone, not a live in/out geofence.
      */
     updateMemberLocation: async (
         journeyId: string,
         memberId: string,
         lat: number,
         lng: number,
-        heading?: number | null
+        heading?: number | null,
+        hasArrived?: boolean
     ): Promise<void> => {
         const journeyRef = doc(db, JOURNEYS_COLLECTION, journeyId);
         const now = new Date().toISOString();
 
-        await updateDoc(journeyRef, {
+        const updates: Record<string, unknown> = {
             [`members.${memberId}.lat`]: lat,
             [`members.${memberId}.lng`]: lng,
             [`members.${memberId}.heading`]: heading ?? null,
             [`members.${memberId}.updatedAt`]: now,
             lastUpdatedAt: now,
-        });
+        };
+        if (hasArrived) {
+            updates[`members.${memberId}.hasArrived`] = true;
+            updates[`members.${memberId}.arrivedAt`] = now;
+        }
+
+        await updateDoc(journeyRef, updates);
     },
 
     /**

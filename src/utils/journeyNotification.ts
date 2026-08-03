@@ -43,3 +43,39 @@ export const showJourneyNotification = async () => {
 
 export const dismissJourneyNotification = () =>
     Notifications.dismissNotificationAsync(NOTIFICATION_ID).catch(() => { });
+
+const ARRIVAL_CHANNEL_ID = 'journey-arrivals';
+
+let arrivalChannelReady = false;
+
+const ensureArrivalChannel = async () => {
+    if (arrivalChannelReady) return;
+    await Notifications.setNotificationChannelAsync(ARRIVAL_CHANNEL_ID, {
+        name: 'Arrivals',
+        importance: Notifications.AndroidImportance.HIGH,
+    });
+    arrivalChannelReady = true;
+};
+
+// A one-off (dismissable) notification fired the moment a member's live position
+// crosses into the destination's arrival radius. Every device watching the same
+// journey detects this independently from the shared Firestore subscription, so
+// no server/push infrastructure is needed for the rest of the group to find out.
+export const showArrivalNotification = async (memberName: string, isSelf: boolean) => {
+    try {
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') return;
+
+        await ensureArrivalChannel();
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: isSelf ? "You've arrived!" : 'Destination reached',
+                body: isSelf ? "You've reached the destination." : `${memberName} has reached the destination.`,
+                sound: true,
+            },
+            trigger: { channelId: ARRIVAL_CHANNEL_ID },
+        });
+    } catch (e) {
+        console.error('Failed to show arrival notification:', e);
+    }
+};

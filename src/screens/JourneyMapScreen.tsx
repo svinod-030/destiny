@@ -13,6 +13,7 @@ import { distanceInMeters } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { useThemeColors } from '../utils/theme';
+import { showArrivalNotification } from '../utils/journeyNotification';
 
 const getFitCoordinates = (journey: Journey) => [
     { latitude: journey.destination.lat, longitude: journey.destination.lng },
@@ -40,6 +41,7 @@ export default function JourneyMapScreen({ navigation }: any) {
         journeyId,
         memberId: uid,
         enabled: !!journeyId,
+        destination: journey ? { lat: journey.destination.lat, lng: journey.destination.lng } : null,
     });
 
     useEffect(() => {
@@ -48,6 +50,15 @@ export default function JourneyMapScreen({ navigation }: any) {
         const unsubscribe = journeyService.subscribeToJourney(
             journeyId,
             (updated) => {
+                const previous = journeyRef.current;
+                if (previous) {
+                    Object.values(updated.members).forEach((member) => {
+                        const justArrived = member.hasArrived && !previous.members[member.id]?.hasArrived;
+                        if (justArrived) {
+                            showArrivalNotification(member.name, member.id === uid);
+                        }
+                    });
+                }
                 journeyRef.current = updated;
                 setJourney(updated);
             },

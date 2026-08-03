@@ -21,3 +21,8 @@ export const formatDistance = (meters: number): string => {
     if (meters < 1000) return `${Math.round(meters)} m`;
     return `${(meters / 1000).toFixed(1)} km`;
 };
+
+// Within this radius, a member is considered to have reached the destination.
+export const ARRIVAL_THRESHOLD_METERS = 100;
+
+export const hasArrived = (distanceMeters: number): boolean => distanceMeters <= ARRIVAL_THRESHOLD_METERS;

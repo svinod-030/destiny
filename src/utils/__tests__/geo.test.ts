@@ -1,4 +1,4 @@
-import { distanceInMeters, formatDistance } from '../geo';
+import { distanceInMeters, formatDistance, hasArrived } from '../geo';
 
 describe('distanceInMeters', () => {
     test('returns 0 for identical coordinates', () => {
@@ -22,5 +22,17 @@ describe('formatDistance', () => {
     test('renders distances of a kilometer or more in km with one decimal', () => {
         expect(formatDistance(1000)).toBe('1.0 km');
         expect(formatDistance(2540)).toBe('2.5 km');
+    });
+});
+
+describe('hasArrived', () => {
+    test('true at and inside the arrival radius', () => {
+        expect(hasArrived(0)).toBe(true);
+        expect(hasArrived(100)).toBe(true);
+    });
+
+    test('false outside the arrival radius', () => {
+        expect(hasArrived(101)).toBe(false);
+        expect(hasArrived(5000)).toBe(false);
     });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { JourneyMember, Destination } from '../types/journey';
-import { distanceInMeters, formatDistance } from '../utils/geo';
+import { distanceInMeters, formatDistance, hasArrived } from '../utils/geo';
 
 interface MemberListItemProps {
     member: JourneyMember;
@@ -11,11 +11,15 @@ interface MemberListItemProps {
 
 export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf }) => {
     const hasLocation = member.lat != null && member.lng != null;
-    const distanceLabel = hasLocation
-        ? formatDistance(
-              distanceInMeters(member.lat as number, member.lng as number, destination.lat, destination.lng)
-          )
-        : 'Waiting for location…';
+    const distanceMeters = hasLocation
+        ? distanceInMeters(member.lat as number, member.lng as number, destination.lat, destination.lng)
+        : null;
+    const arrived = distanceMeters != null && hasArrived(distanceMeters);
+
+    let statusLabel = 'Waiting for location…';
+    if (distanceMeters != null) {
+        statusLabel = arrived ? 'Arrived' : formatDistance(distanceMeters);
+    }
 
     return (
         <View className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700">
@@ -31,7 +35,15 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
                     {isSelf ? ' (You)' : ''}
                     {member.isCreator ? ' · Creator' : ''}
                 </Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm">{distanceLabel}</Text>
+                <Text
+                    className={
+                        arrived
+                            ? 'text-green-600 dark:text-green-400 text-sm font-bold'
+                            : 'text-gray-500 dark:text-gray-400 text-sm'
+                    }
+                >
+                    {statusLabel}
+                </Text>
             </View>
         </View>
     );

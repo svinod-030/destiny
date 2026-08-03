@@ -7,11 +7,15 @@ import {
     clearBackgroundLocationTarget,
 } from '../tasks/locationTask';
 import { showJourneyNotification, dismissJourneyNotification } from '../utils/journeyNotification';
+import { distanceInMeters, hasArrived } from '../utils/geo';
+
+type Coordinate = { lat: number; lng: number };
 
 interface UseLiveLocationOptions {
     journeyId: string | null;
     memberId: string | null;
     enabled: boolean;
+    destination: Coordinate | null;
 }
 
 const WATCH_OPTIONS: Location.LocationOptions = {
@@ -20,8 +24,8 @@ const WATCH_OPTIONS: Location.LocationOptions = {
     distanceInterval: 15,
 };
 
-const startBackgroundUpdates = async (journeyId: string, memberId: string) => {
-    await setBackgroundLocationTarget(journeyId, memberId);
+const startBackgroundUpdates = async (journeyId: string, memberId: string, destination: Coordinate | null) => {
+    await setBackgroundLocationTarget(journeyId, memberId, destination);
     const alreadyStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
     if (alreadyStarted) return;
 
@@ -39,28 +43,51 @@ const startBackgroundUpdates = async (journeyId: string, memberId: string) => {
 // "Always Allow" prompt is needed just to use the app). If the user opts into
 // background access when prompted at journey start, we switch to a background
 // location task instead, which keeps updating even while the app isn't in view.
-export const useLiveLocation = ({ journeyId, memberId, enabled }: UseLiveLocationOptions) => {
+export const useLiveLocation = ({ journeyId, memberId, enabled, destination }: UseLiveLocationOptions) => {
     const [permissionDenied, setPermissionDenied] = useState(false);
     const [isBackgroundEnabled, setIsBackgroundEnabled] = useState(false);
     const [showBackgroundPrompt, setShowBackgroundPrompt] = useState(false);
     const subscriptionRef = useRef<Location.LocationSubscription | null>(null);
+
+    // The journey's destination is known asynchronously (after the Firestore doc
+    // loads), slightly after tracking starts - a ref lets the location callbacks
+    // always read the latest value without restarting the watcher/task.
+    const destinationRef = useRef(destination);
+    useEffect(() => {
+        destinationRef.current = destination;
+        if (journeyId && memberId) {
+            Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK).then((started) => {
+                if (started) setBackgroundLocationTarget(journeyId, memberId, destination).catch(() => { });
+            });
+        }
+    }, [destination, journeyId, memberId]);
 
     useEffect(() => {
         if (!enabled || !journeyId || !memberId) return;
 
         let isMounted = true;
 
+        const pushLocation = (location: Location.LocationObject) => {
+            const dest = destinationRef.current;
+            const arrived = dest
+                ? hasArrived(
+                      distanceInMeters(location.coords.latitude, location.coords.longitude, dest.lat, dest.lng)
+                  )
+                : false;
+
+            return journeyService.updateMemberLocation(
+                journeyId,
+                memberId,
+                location.coords.latitude,
+                location.coords.longitude,
+                location.coords.heading,
+                arrived
+            );
+        };
+
         const startForegroundWatch = async () => {
             subscriptionRef.current = await Location.watchPositionAsync(WATCH_OPTIONS, (location) => {
-                journeyService
-                    .updateMemberLocation(
-                        journeyId,
-                        memberId,
-                        location.coords.latitude,
-                        location.coords.longitude,
-                        location.coords.heading
-                    )
-                    .catch((error) => console.error('Failed to push location:', error));
+                pushLocation(location).catch((error) => console.error('Failed to push location:', error));
             });
         };
 
@@ -75,7 +102,7 @@ export const useLiveLocation = ({ journeyId, memberId, enabled }: UseLiveLocatio
             const { status: backgroundStatus } = await Location.getBackgroundPermissionsAsync();
             if (backgroundStatus === 'granted') {
                 if (isMounted) setIsBackgroundEnabled(true);
-                await startBackgroundUpdates(journeyId, memberId);
+                await startBackgroundUpdates(journeyId, memberId, destinationRef.current);
             } else {
                 if (isMounted) setShowBackgroundPrompt(true);
                 await startForegroundWatch();
@@ -105,7 +132,7 @@ export const useLiveLocation = ({ journeyId, memberId, enabled }: UseLiveLocatio
 
         subscriptionRef.current?.remove();
         subscriptionRef.current = null;
-        await startBackgroundUpdates(journeyId, memberId);
+        await startBackgroundUpdates(journeyId, memberId, destinationRef.current);
         setIsBackgroundEnabled(true);
         return true;
     };
