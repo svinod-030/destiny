@@ -16,6 +16,7 @@ jest.mock('firebase/firestore', () => ({
 const existingJourney: Journey = {
     id: 'ABC123',
     destination: { name: 'The Lake House', lat: 12.9, lng: 77.6 },
+    stops: [],
     creatorId: 'creator-uid',
     createdAt: '2026-01-01T00:00:00.000Z',
     lastUpdatedAt: '2026-01-01T00:00:00.000Z',
@@ -59,6 +60,18 @@ describe('journeyService', () => {
                 lat: null,
                 lng: null,
             });
+            expect(written.stops).toEqual([]);
+        });
+
+        test('stores stops in the exact order given, without re-sorting them', async () => {
+            const destination = { name: 'Destination', lat: 12.9716, lng: 77.5946 };
+            const near = { name: 'Near', lat: 12.9720, lng: 77.5950 };
+            const far = { name: 'Far', lat: 13.0827, lng: 80.2707 };
+
+            await journeyService.createJourney(destination, 'creator-uid', 'Alex', [near, far]);
+
+            const written = (setDoc as jest.Mock).mock.calls[0][1] as Journey;
+            expect(written.stops.map((s) => s.name)).toEqual(['Near', 'Far']);
         });
     });
 

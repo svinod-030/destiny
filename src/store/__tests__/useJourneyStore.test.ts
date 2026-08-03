@@ -4,6 +4,7 @@ import { Journey } from '../../types/journey';
 const sampleJourney: Journey = {
     id: 'ABC123',
     destination: { name: 'The Lake House', lat: 12.9, lng: 77.6 },
+    stops: [],
     creatorId: 'creator-uid',
     createdAt: '2026-01-01T00:00:00.000Z',
     lastUpdatedAt: '2026-01-01T00:00:00.000Z',

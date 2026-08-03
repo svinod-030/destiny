@@ -20,6 +20,9 @@ export interface JourneyMember {
 export interface Journey {
     id: string;
     destination: Destination;
+    // Intermediate stops along the way, ordered farthest-from-destination first
+    // (i.e. the order they'd naturally be visited in before the final destination).
+    stops: Destination[];
     creatorId: string;
     createdAt: string;
     lastUpdatedAt: string;

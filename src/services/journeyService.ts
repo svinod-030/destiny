@@ -21,12 +21,15 @@ const generateJourneyId = () => {
 export const journeyService = {
     /**
      * Creates a new journey document in Firestore with the creator as its first member.
+     * `stops` is stored in the exact order given - the caller (the creation UI) owns
+     * ordering, including any manual reordering the user has done.
      * @returns The generated unique journey code
      */
     createJourney: async (
         destination: Destination,
         creatorId: string,
-        creatorName: string
+        creatorName: string,
+        stops: Destination[] = []
     ): Promise<string> => {
         const journeyId = generateJourneyId();
         const journeyRef = doc(db, JOURNEYS_COLLECTION, journeyId);
@@ -48,6 +51,7 @@ export const journeyService = {
         const journey: Journey = {
             id: journeyId,
             destination,
+            stops,
             creatorId,
             createdAt: now,
             lastUpdatedAt: now,

@@ -10,6 +10,14 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useThemeColors } from '../utils/theme';
+import { sortByDistanceFromPoint } from '../utils/geo';
+
+interface SelectedPoint {
+    id: string;
+    name: string;
+    lat: number;
+    lng: number;
+}
 
 const DEFAULT_REGION = {
     latitude: 12.9716,
@@ -21,15 +29,20 @@ const DEFAULT_REGION = {
 const MIN_QUERY_LENGTH = 3;
 const AUTOCOMPLETE_DEBOUNCE_MS = 300;
 
+const newPointId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
 export default function HomeScreen({ navigation }: any) {
     const mapRef = useRef<MapView>(null);
-    const pinRef = useRef<{ latitude: number; longitude: number } | null>(null);
+    const selectedPointsRef = useRef<SelectedPoint[]>([]);
     const currentLocationRef = useRef<{ lat: number; lng: number } | null>(null);
     const sessionTokenRef = useRef(placesService.newSessionToken());
     const suppressAutocompleteRef = useRef(false);
 
-    const [pin, setPin] = useState<{ latitude: number; longitude: number } | null>(null);
-    const [destinationName, setDestinationName] = useState('');
+    // The first selected point is the destination; every point after that is an
+    // intermediate stop. New stops default into farthest-from-destination-first
+    // order, but from then on the array order is the source of truth - the user
+    // can freely reorder stops with the up/down controls in the list.
+    const [selectedPoints, setSelectedPoints] = useState<SelectedPoint[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showsUserLocation, setShowsUserLocation] = useState(false);
@@ -40,12 +53,52 @@ export default function HomeScreen({ navigation }: any) {
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
     const colors = useThemeColors();
 
-    // A pin the user picked (via search or long-press) always wins over the slow
-    // GPS fix below - track it in a ref so the async effect can see the latest
-    // value even if it resolves after the user has already chosen a destination.
-    const setPinAndRef = (coordinate: { latitude: number; longitude: number } | null) => {
-        pinRef.current = coordinate;
-        setPin(coordinate);
+    const addPoint = (point: SelectedPoint) => {
+        setSelectedPoints((prev) => {
+            let updated: SelectedPoint[];
+            if (prev.length === 0) {
+                // First point picked is always the destination.
+                updated = [point];
+            } else {
+                const [destination, ...stops] = prev;
+                const sortedStops = sortByDistanceFromPoint([...stops, point], destination);
+                updated = [destination, ...sortedStops];
+            }
+            selectedPointsRef.current = updated;
+            return updated;
+        });
+    };
+
+    const updatePointName = (id: string, pointName: string) => {
+        setSelectedPoints((prev) => {
+            const updated = prev.map((p) => (p.id === id ? { ...p, name: pointName } : p));
+            selectedPointsRef.current = updated;
+            return updated;
+        });
+    };
+
+    const removePoint = (id: string) => {
+        setSelectedPoints((prev) => {
+            const updated = prev.filter((p) => p.id !== id);
+            selectedPointsRef.current = updated;
+            return updated;
+        });
+    };
+
+    // Moves a stop earlier/later among the other stops (index 0 is always the
+    // destination and is never reordered by this).
+    const moveStop = (id: string, direction: 'up' | 'down') => {
+        setSelectedPoints((prev) => {
+            const index = prev.findIndex((p) => p.id === id);
+            if (index < 1) return prev;
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            if (targetIndex < 1 || targetIndex >= prev.length) return prev;
+
+            const updated = [...prev];
+            [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
+            selectedPointsRef.current = updated;
+            return updated;
+        });
     };
 
     useEffect(() => {
@@ -60,7 +113,7 @@ export default function HomeScreen({ navigation }: any) {
                 setShowsUserLocation(true);
                 const current = await Location.getCurrentPositionAsync({});
                 currentLocationRef.current = { lat: current.coords.latitude, lng: current.coords.longitude };
-                if (pinRef.current) return;
+                if (selectedPointsRef.current.length > 0) return;
                 mapRef.current?.animateToRegion({
                     latitude: current.coords.latitude,
                     longitude: current.coords.longitude,
@@ -72,6 +125,25 @@ export default function HomeScreen({ navigation }: any) {
             }
         })();
     }, []);
+
+    // Keep the map framing every selected point: zoom to the single pin when
+    // there's just one, otherwise fit all of them (destination + stops) in view.
+    useEffect(() => {
+        if (selectedPoints.length === 0) return;
+        if (selectedPoints.length === 1) {
+            mapRef.current?.animateToRegion({
+                latitude: selectedPoints[0].lat,
+                longitude: selectedPoints[0].lng,
+                latitudeDelta: 0.02,
+                longitudeDelta: 0.02,
+            });
+        } else {
+            mapRef.current?.fitToCoordinates(
+                selectedPoints.map((p) => ({ latitude: p.lat, longitude: p.lng })),
+                { edgePadding: { top: 100, right: 80, bottom: 80, left: 80 }, animated: true }
+            );
+        }
+    }, [selectedPoints]);
 
     // Live autocomplete suggestions as the user types, debounced and biased toward
     // their current location (like Google Maps). Silently does nothing if no
@@ -110,40 +182,34 @@ export default function HomeScreen({ navigation }: any) {
     const handleLongPress = async (event: LongPressEvent) => {
         setSuggestions([]);
         const { coordinate } = event.nativeEvent;
-        setDestinationName('');
-        setPinAndRef(coordinate);
+        const id = newPointId();
+        addPoint({ id, name: '', lat: coordinate.latitude, lng: coordinate.longitude });
         try {
             const [place] = await Location.reverseGeocodeAsync(coordinate);
             if (place) {
                 const label = [place.name, place.street, place.city].filter(Boolean).join(', ');
-                if (label) setDestinationName(label);
+                if (label) updatePointName(id, label);
             }
         } catch (error) {
             console.error('Reverse geocode failed:', error);
         }
     };
 
-    const focusOnCoordinate = (latitude: number, longitude: number) => {
-        setPinAndRef({ latitude, longitude });
-        mapRef.current?.animateToRegion({
-            latitude,
-            longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-        });
-    };
-
     const handleSelectSuggestion = async (suggestion: PlaceSuggestion) => {
         Keyboard.dismiss();
         setSuggestions([]);
         suppressAutocompleteRef.current = true;
-        setSearchQuery(suggestion.primaryText);
+        setSearchQuery('');
         try {
             const details = await placesService.getPlaceDetails(suggestion.placeId, sessionTokenRef.current);
             sessionTokenRef.current = placesService.newSessionToken();
             if (!details) return;
-            focusOnCoordinate(details.lat, details.lng);
-            setDestinationName(details.name || suggestion.primaryText);
+            addPoint({
+                id: newPointId(),
+                name: details.name || suggestion.primaryText,
+                lat: details.lat,
+                lng: details.lng,
+            });
         } catch (error) {
             console.error('Failed to resolve place:', error);
             Alert.alert('Error', 'Could not load that place. Please try again.');
@@ -164,8 +230,8 @@ export default function HomeScreen({ navigation }: any) {
             }
 
             const { latitude, longitude } = results[0];
-            focusOnCoordinate(latitude, longitude);
-            setDestinationName(query);
+            addPoint({ id: newPointId(), name: query, lat: latitude, lng: longitude });
+            setSearchQuery('');
             sessionTokenRef.current = placesService.newSessionToken();
         } catch (error) {
             console.error('Search failed:', error);
@@ -174,7 +240,7 @@ export default function HomeScreen({ navigation }: any) {
     };
 
     const handleCreate = async () => {
-        if (!pin) return;
+        if (selectedPoints.length === 0) return;
         if (!uid) {
             Alert.alert(
                 'Not signed in yet',
@@ -184,22 +250,29 @@ export default function HomeScreen({ navigation }: any) {
         }
         setIsCreating(true);
         try {
-            const resolvedName = destinationName.trim() || 'Destination';
-            const journeyId = await journeyService.createJourney(
-                { name: resolvedName, lat: pin.latitude, lng: pin.longitude },
-                uid,
-                name
-            );
+            const [destinationPoint, ...rest] = selectedPoints;
+            const destination = {
+                name: destinationPoint.name.trim() || 'Destination',
+                lat: destinationPoint.lat,
+                lng: destinationPoint.lng,
+            };
+            const stops = rest.map((p, i) => ({
+                name: p.name.trim() || `Stop ${i + 1}`,
+                lat: p.lat,
+                lng: p.lng,
+            }));
+
+            const journeyId = await journeyService.createJourney(destination, uid, name, stops);
             setActiveJourney(journeyId, 'creator');
             addHistoryEntry({
                 id: journeyId,
-                destinationName: resolvedName,
+                destinationName: destination.name,
                 role: 'creator',
                 status: 'active',
                 startedAt: new Date().toISOString(),
             });
-            setPinAndRef(null);
-            setDestinationName('');
+            setSelectedPoints([]);
+            selectedPointsRef.current = [];
             navigation.navigate('JourneyMap');
         } catch (error) {
             console.error('Failed to create journey:', error);
@@ -237,11 +310,18 @@ export default function HomeScreen({ navigation }: any) {
         );
     }
 
+    const destinationPoint = selectedPoints[0] ?? null;
+    const stopPoints = selectedPoints.slice(1);
+
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
             <View className="px-4 pt-4 pb-2">
                 <Text className="text-gray-900 dark:text-white text-2xl font-bold">Start a Journey</Text>
-                <Text className="text-gray-500 dark:text-gray-400 mt-1">Search the map or long-press to drop a pin</Text>
+                <Text className="text-gray-500 dark:text-gray-400 mt-1">
+                    {destinationPoint
+                        ? 'Add more stops along the way, or start when ready'
+                        : 'Search or long-press to set your destination'}
+                </Text>
             </View>
 
             <View className="flex-1 mx-4">
@@ -254,7 +334,24 @@ export default function HomeScreen({ navigation }: any) {
                         showsUserLocation={showsUserLocation}
                         showsMyLocationButton={false}
                     >
-                        {pin && <Marker coordinate={pin} pinColor="#3b82f6" />}
+                        {destinationPoint && (
+                            <Marker
+                                coordinate={{ latitude: destinationPoint.lat, longitude: destinationPoint.lng }}
+                                pinColor="#3b82f6"
+                                title={destinationPoint.name || 'Destination'}
+                            />
+                        )}
+                        {stopPoints.map((stop, index) => (
+                            <Marker
+                                key={stop.id}
+                                coordinate={{ latitude: stop.lat, longitude: stop.lng }}
+                                title={stop.name || `Stop ${index + 1}`}
+                            >
+                                <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
+                                    <Text className="text-white font-bold text-xs">{index + 1}</Text>
+                                </View>
+                            </Marker>
+                        ))}
                     </MapView>
                 </View>
 
@@ -263,7 +360,7 @@ export default function HomeScreen({ navigation }: any) {
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        placeholder="Search for a destination"
+                        placeholder={destinationPoint ? 'Search for a stop' : 'Search for a destination'}
                         placeholderTextColor={colors.placeholder}
                         className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
                         style={{
@@ -314,22 +411,83 @@ export default function HomeScreen({ navigation }: any) {
             </View>
 
             <View className="p-4">
-                {pin && (
-                    <View className="flex-row items-center mb-3 px-1">
-                        <Ionicons name="location" size={18} color="#3b82f6" />
-                        <Text
-                            className="text-gray-900 dark:text-white ml-2 text-base font-medium flex-1"
-                            numberOfLines={1}
-                        >
-                            {destinationName.trim() || 'Destination'}
+                {destinationPoint && (
+                    <View className="mb-3">
+                        <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1.5 tracking-[3px] ml-1">
+                            Destination
                         </Text>
+                        <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 rounded-2xl px-3 py-3">
+                            <View className="w-7 h-7 rounded-full bg-blue-600 items-center justify-center">
+                                <Ionicons name="flag" size={14} color="#fff" />
+                            </View>
+                            <Text
+                                className="text-gray-900 dark:text-white ml-3 text-base font-semibold flex-1"
+                                numberOfLines={1}
+                            >
+                                {destinationPoint.name.trim() || 'Destination'}
+                            </Text>
+                            <TouchableOpacity onPress={() => removePoint(destinationPoint.id)} className="p-1">
+                                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+
+                {stopPoints.length > 0 && (
+                    <View className="mb-3">
+                        <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1.5 tracking-[3px] ml-1">
+                            Stops · In Order
+                        </Text>
+                        <View className="gap-2">
+                            {stopPoints.map((stop, index) => (
+                                <View
+                                    key={stop.id}
+                                    className="flex-row items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl pl-3 pr-1 py-2"
+                                >
+                                    <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center">
+                                        <Text className="text-white font-bold text-xs">{index + 1}</Text>
+                                    </View>
+                                    <Text
+                                        className="text-gray-900 dark:text-white ml-3 text-base font-medium flex-1"
+                                        numberOfLines={1}
+                                    >
+                                        {stop.name.trim() || `Stop ${index + 1}`}
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={() => moveStop(stop.id, 'up')}
+                                        disabled={index === 0}
+                                        className="p-1.5"
+                                    >
+                                        <Ionicons
+                                            name="chevron-up"
+                                            size={20}
+                                            color={index === 0 ? colors.border : colors.textSecondary}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => moveStop(stop.id, 'down')}
+                                        disabled={index === stopPoints.length - 1}
+                                        className="p-1.5"
+                                    >
+                                        <Ionicons
+                                            name="chevron-down"
+                                            size={20}
+                                            color={index === stopPoints.length - 1 ? colors.border : colors.textSecondary}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => removePoint(stop.id)} className="p-1.5">
+                                        <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 )}
 
                 <TouchableOpacity
                     onPress={handleCreate}
-                    disabled={!pin || isCreating}
-                    className={`p-5 rounded-2xl items-center flex-row justify-center ${!pin || isCreating ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                    disabled={selectedPoints.length === 0 || isCreating}
+                    className={`p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
                         }`}
                 >
                     {isCreating ? (

@@ -18,6 +18,7 @@ import { getInitials } from '../utils/color';
 
 const getFitCoordinates = (journey: Journey) => [
     { latitude: journey.destination.lat, longitude: journey.destination.lng },
+    ...(journey.stops ?? []).map((s) => ({ latitude: s.lat, longitude: s.lng })),
     ...Object.values(journey.members)
         .filter((m) => m.lat != null && m.lng != null)
         .map((m) => ({ latitude: m.lat as number, longitude: m.lng as number })),
@@ -221,6 +222,17 @@ export default function JourneyMapScreen({ navigation }: any) {
                         title={journey.destination.name}
                         pinColor="#EF4444"
                     />
+                    {(journey.stops ?? []).map((stop, index) => (
+                        <Marker
+                            key={`${stop.lat}-${stop.lng}-${index}`}
+                            coordinate={{ latitude: stop.lat, longitude: stop.lng }}
+                            title={stop.name}
+                        >
+                            <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
+                                <Text className="text-white font-bold text-xs">{index + 1}</Text>
+                            </View>
+                        </Marker>
+                    ))}
                     {members
                         .filter((m) => m.lat != null && m.lng != null)
                         .map((m) => (
@@ -263,6 +275,9 @@ export default function JourneyMapScreen({ navigation }: any) {
                         <Text className="text-gray-900 dark:text-white text-lg font-bold">{journey.destination.name}</Text>
                         <Text className="text-gray-500 text-xs uppercase tracking-widest">
                             {members.length} {members.length === 1 ? 'member' : 'members'}
+                            {(journey.stops?.length ?? 0) > 0
+                                ? ` · ${journey.stops.length} ${journey.stops.length === 1 ? 'stop' : 'stops'}`
+                                : ''}
                         </Text>
                     </View>
                     <TouchableOpacity

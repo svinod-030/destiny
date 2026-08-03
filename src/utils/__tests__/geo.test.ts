@@ -1,4 +1,4 @@
-import { distanceInMeters, formatDistance, hasArrived } from '../geo';
+import { distanceInMeters, formatDistance, hasArrived, sortByDistanceFromPoint } from '../geo';
 
 describe('distanceInMeters', () => {
     test('returns 0 for identical coordinates', () => {
@@ -34,5 +34,28 @@ describe('hasArrived', () => {
     test('false outside the arrival radius', () => {
         expect(hasArrived(101)).toBe(false);
         expect(hasArrived(5000)).toBe(false);
+    });
+});
+
+describe('sortByDistanceFromPoint', () => {
+    const destination = { lat: 12.9716, lng: 77.5946 };
+    const near = { id: 'near', lat: 12.9720, lng: 77.5950 };
+    const mid = { id: 'mid', lat: 12.9800, lng: 77.6100 };
+    const far = { id: 'far', lat: 13.0827, lng: 80.2707 }; // Chennai - genuinely far
+
+    test('orders points farthest-from-destination first', () => {
+        const sorted = sortByDistanceFromPoint([near, far, mid], destination);
+        expect(sorted.map((p) => p.id)).toEqual(['far', 'mid', 'near']);
+    });
+
+    test('does not mutate the input array', () => {
+        const input = [near, far, mid];
+        const original = [...input];
+        sortByDistanceFromPoint(input, destination);
+        expect(input).toEqual(original);
+    });
+
+    test('returns an empty array for no points', () => {
+        expect(sortByDistanceFromPoint([], destination)).toEqual([]);
     });
 });

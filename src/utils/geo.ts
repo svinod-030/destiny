@@ -26,3 +26,16 @@ export const formatDistance = (meters: number): string => {
 export const ARRIVAL_THRESHOLD_METERS = 100;
 
 export const hasArrived = (distanceMeters: number): boolean => distanceMeters <= ARRIVAL_THRESHOLD_METERS;
+
+// Orders intermediate stops farthest-from-destination first, so the list reads
+// as the natural order they'd be visited in on the way to the final destination.
+export const sortByDistanceFromPoint = <T extends { lat: number; lng: number }>(
+    points: T[],
+    from: { lat: number; lng: number }
+): T[] => {
+    return [...points].sort((a, b) => {
+        const distA = distanceInMeters(a.lat, a.lng, from.lat, from.lng);
+        const distB = distanceInMeters(b.lat, b.lng, from.lat, from.lng);
+        return distB - distA;
+    });
+};
