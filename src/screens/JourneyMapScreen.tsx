@@ -38,6 +38,7 @@ export default function JourneyMapScreen({ navigation }: any) {
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [shareVisible, setShareVisible] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
+    const [activeTab, setActiveTab] = useState<'members' | 'route'>('members');
 
     const { permissionDenied, showBackgroundPrompt, enableBackgroundTracking, dismissBackgroundPrompt } = useLiveLocation({
         journeyId,
@@ -295,16 +296,77 @@ export default function JourneyMapScreen({ navigation }: any) {
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-                    {members.map((member) => (
-                        <MemberListItem
-                            key={member.id}
-                            member={member}
-                            destination={journey.destination}
-                            isSelf={member.id === uid}
-                        />
-                    ))}
-                </ScrollView>
+                <View className="flex-row mx-4 mb-2 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1">
+                    <TouchableOpacity
+                        onPress={() => setActiveTab('members')}
+                        className={`flex-1 flex-row items-center justify-center py-2.5 rounded-xl ${activeTab === 'members' ? 'bg-white dark:bg-gray-700' : ''
+                            }`}
+                    >
+                        <Ionicons name="people" size={16} color={activeTab === 'members' ? '#3b82f6' : colors.textSecondary} />
+                        <Text
+                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'members' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                                }`}
+                        >
+                            Members
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setActiveTab('route')}
+                        className={`flex-1 flex-row items-center justify-center py-2.5 rounded-xl ${activeTab === 'route' ? 'bg-white dark:bg-gray-700' : ''
+                            }`}
+                    >
+                        <Ionicons name="map" size={16} color={activeTab === 'route' ? '#3b82f6' : colors.textSecondary} />
+                        <Text
+                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'route' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                                }`}
+                        >
+                            Route
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                {activeTab === 'members' ? (
+                    <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+                        {members.map((member) => (
+                            <MemberListItem
+                                key={member.id}
+                                member={member}
+                                destination={journey.destination}
+                                isSelf={member.id === uid}
+                            />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+                        {(journey.stops ?? []).map((stop, index) => (
+                            <View
+                                key={`${stop.lat}-${stop.lng}-${index}`}
+                                className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700"
+                            >
+                                <View className="w-10 h-10 rounded-full bg-orange-500 items-center justify-center">
+                                    <Text className="text-white font-bold">{index + 1}</Text>
+                                </View>
+                                <Text
+                                    className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
+                                    numberOfLines={1}
+                                >
+                                    {stop.name}
+                                </Text>
+                            </View>
+                        ))}
+                        <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 px-4 py-3 rounded-2xl">
+                            <View className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center">
+                                <Ionicons name="flag" size={18} color="#fff" />
+                            </View>
+                            <Text
+                                className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
+                                numberOfLines={1}
+                            >
+                                {journey.destination.name}
+                            </Text>
+                        </View>
+                    </ScrollView>
+                )}
             </View>
 
             <Modal visible={shareVisible} transparent animationType="fade" onRequestClose={() => setShareVisible(false)}>
