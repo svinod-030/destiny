@@ -27,6 +27,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
     const [codeInput, setCodeInput] = useState('');
     const { joinJourney, isLoading, error } = useJourneySync();
     const { uid, name } = useAuthStore();
+    const activeJourneyId = useJourneyStore((state) => state.journeyId);
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
     const colors = useThemeColors();
@@ -86,6 +87,34 @@ export default function JoinJourneyScreen({ navigation }: any) {
             navigation.navigate('JourneyMap');
         }
     };
+
+    // Only one journey can be active at a time - joining another here would
+    // silently orphan the current one's live tracking (Firestore doc left
+    // running with no one updating it). Send them back to it instead.
+    if (activeJourneyId) {
+        return (
+            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8">
+                <View className="bg-blue-600/20 p-6 rounded-full mb-6">
+                    <Ionicons name="navigate" size={60} color="#3b82f6" />
+                </View>
+                <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center">
+                    Journey in progress
+                </Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-center mt-3 text-base leading-6">
+                    You already have an active journey. Leave or end it before joining another.
+                </Text>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('JourneyMap')}
+                    className="mt-8 bg-blue-600 px-8 py-5 rounded-2xl flex-row items-center active:bg-blue-700"
+                >
+                    <Ionicons name="arrow-forward-circle-outline" size={20} color="#fff" />
+                    <Text className="text-white font-bold ml-2 uppercase tracking-widest">
+                        Return to Journey
+                    </Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>

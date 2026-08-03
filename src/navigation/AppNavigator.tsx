@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
@@ -98,7 +98,25 @@ export default function AppNavigator() {
                 initialRouteName={journeyId ? 'JourneyMap' : 'HomeTabs'}
             >
                 <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ title: '' }} />
-                <Stack.Screen name="JourneyMap" component={JourneyMapScreen} options={{ title: 'Journey' }} />
+                <Stack.Screen
+                    name="JourneyMap"
+                    component={JourneyMapScreen}
+                    options={({ navigation }) => ({
+                        title: 'Journey',
+                        // A journey can be the very first/only screen in the stack (e.g. relaunching
+                        // the app while one is active), so there's no "back" history to rely on -
+                        // this always has somewhere to go. The journey itself keeps running; only
+                        // starting/joining another one is blocked, on the other screens themselves.
+                        headerLeft: () => (
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('HomeTabs')}
+                                style={{ padding: 8, marginLeft: -8 }}
+                            >
+                                <Ionicons name="arrow-back" size={24} color={colors.headerTint} />
+                            </TouchableOpacity>
+                        ),
+                    })}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );
