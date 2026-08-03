@@ -13,3 +13,14 @@ export const colorForId = (id: string): string => {
     }
     return PALETTE[Math.abs(hash) % PALETTE.length];
 };
+
+// Two-character initials for avatar markers: one letter from each of the first
+// two words if the name has multiple words, otherwise the first two letters
+// of the single word.
+export const getInitials = (name: string): string => {
+    const words = name.trim().split(/\s+/).filter(Boolean);
+    if (words.length >= 2) {
+        return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    }
+    return (words[0] ?? '').slice(0, 2).toUpperCase();
+};

@@ -14,6 +14,7 @@ import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification } from '../utils/journeyNotification';
+import { getInitials } from '../utils/color';
 
 const getFitCoordinates = (journey: Journey) => [
     { latitude: journey.destination.lat, longitude: journey.destination.lng },
@@ -230,10 +231,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                             >
                                 <View
                                     style={{ backgroundColor: m.color }}
-                                    className="w-8 h-8 rounded-full items-center justify-center border-2 border-white"
+                                    className="w-12 h-12 rounded-full items-center justify-center border-2 border-white"
                                 >
-                                    <Text className="text-white font-bold text-xs">
-                                        {m.name.charAt(0).toUpperCase()}
+                                    <Text className="text-white font-bold text-base">
+                                        {getInitials(m.name)}
                                     </Text>
                                 </View>
                             </Marker>
