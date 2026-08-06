@@ -134,6 +134,24 @@ describe('journeyService', () => {
         });
     });
 
+    describe('updateRoute', () => {
+        test('replaces the destination and stops array in a single update', async () => {
+            const destination = { name: 'New Destination', lat: 12.9, lng: 77.6 };
+            const stops = [
+                { name: 'Near', lat: 12.972, lng: 77.595 },
+                { name: 'Far', lat: 13.0827, lng: 80.2707 },
+            ];
+
+            await journeyService.updateRoute('ABC123', destination, stops);
+
+            expect(updateDoc).toHaveBeenCalledTimes(1);
+            const [, update] = (updateDoc as jest.Mock).mock.calls[0];
+            expect(update.destination).toEqual(destination);
+            expect(update.stops).toEqual(stops);
+            expect(update.lastUpdatedAt).toEqual(expect.any(String));
+        });
+    });
+
     describe('endJourney', () => {
         test('deletes the journey document', async () => {
             await journeyService.endJourney('ABC123');

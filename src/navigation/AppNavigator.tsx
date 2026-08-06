@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 
 import HomeScreen from '../screens/HomeScreen';
@@ -67,8 +68,6 @@ function HomeTabs() {
 }
 
 export default function AppNavigator() {
-    // If a journey was active when the app last closed, jump straight back into it.
-    // (Best-effort: if AsyncStorage hasn't finished rehydrating yet, this falls back to HomeTabs.)
     const journeyId = useJourneyStore((state) => state.journeyId);
     const colors = useThemeColors();
     const { colorScheme } = useColorScheme();
@@ -91,33 +90,44 @@ export default function AppNavigator() {
         },
     };
 
+    // If a journey was active when the app last closed, jump straight back into it -
+    // but keep HomeTabs underneath in the stack (rather than making JourneyMap the sole
+    // route) so hardware back / the swipe-back gesture always has somewhere to land,
+    // the same place the header's back button goes.
+    // (Best-effort: if AsyncStorage hasn't finished rehydrating yet, this falls back to HomeTabs.)
+    const initialState = journeyId
+        ? { index: 1, routes: [{ name: 'HomeTabs' }, { name: 'JourneyMap' }] }
+        : undefined;
+
     return (
-        <NavigationContainer theme={navigationTheme}>
-            <Stack.Navigator
-                screenOptions={stackOptions}
-                initialRouteName={journeyId ? 'JourneyMap' : 'HomeTabs'}
-            >
-                <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ title: '' }} />
-                <Stack.Screen
-                    name="JourneyMap"
-                    component={JourneyMapScreen}
-                    options={({ navigation }) => ({
-                        title: 'Journey',
-                        // A journey can be the very first/only screen in the stack (e.g. relaunching
-                        // the app while one is active), so there's no "back" history to rely on -
-                        // this always has somewhere to go. The journey itself keeps running; only
-                        // starting/joining another one is blocked, on the other screens themselves.
-                        headerLeft: () => (
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('HomeTabs')}
-                                style={{ padding: 8, marginLeft: -8 }}
-                            >
-                                <Ionicons name="arrow-back" size={24} color={colors.headerTint} />
-                            </TouchableOpacity>
-                        ),
-                    })}
-                />
-            </Stack.Navigator>
-        </NavigationContainer>
+        <>
+            {/* Keeps the OS status bar's icon/text color readable against the header
+                background in both themes - explicit rather than 'auto' since the app's
+                theme is a user preference (useThemeStore), which can differ from the
+                device's own system appearance. */}
+            <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+            <NavigationContainer theme={navigationTheme} initialState={initialState}>
+                <Stack.Navigator screenOptions={stackOptions} initialRouteName="HomeTabs">
+                    <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ title: '' }} />
+                    <Stack.Screen
+                        name="JourneyMap"
+                        component={JourneyMapScreen}
+                        options={({ navigation }) => ({
+                            title: 'Journey',
+                            headerLeft: () => (
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        navigation.canGoBack() ? navigation.goBack() : navigation.navigate('HomeTabs')
+                                    }
+                                    style={{ padding: 8, marginLeft: -8 }}
+                                >
+                                    <Ionicons name="arrow-back" size={24} color={colors.headerTint} />
+                                </TouchableOpacity>
+                            ),
+                        })}
+                    />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </>
     );
 }

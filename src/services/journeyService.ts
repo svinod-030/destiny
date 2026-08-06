@@ -152,6 +152,20 @@ export const journeyService = {
     },
 
     /**
+     * Replaces a journey's destination and intermediate stops together (creator
+     * only, enforced by Firestore rules - members may only touch their own
+     * `members` entry). The caller owns ordering, same as `createJourney`.
+     */
+    updateRoute: async (journeyId: string, destination: Destination, stops: Destination[]): Promise<void> => {
+        const journeyRef = doc(db, JOURNEYS_COLLECTION, journeyId);
+        await updateDoc(journeyRef, {
+            destination,
+            stops,
+            lastUpdatedAt: new Date().toISOString(),
+        });
+    },
+
+    /**
      * Subscribes to real-time updates for a journey.
      * @returns An unsubscribe function
      */

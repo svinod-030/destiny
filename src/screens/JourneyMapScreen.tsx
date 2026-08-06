@@ -12,6 +12,7 @@ import { Journey } from '../types/journey';
 import { distanceInMeters } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
+import { EditStopsModal } from '../components/EditStopsModal';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification } from '../utils/journeyNotification';
 import { getInitials } from '../utils/color';
@@ -37,6 +38,7 @@ export default function JourneyMapScreen({ navigation }: any) {
     const [journey, setJourney] = useState<Journey | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [shareVisible, setShareVisible] = useState(false);
+    const [editStopsVisible, setEditStopsVisible] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
     const [activeTab, setActiveTab] = useState<'members' | 'route'>('members');
 
@@ -272,8 +274,13 @@ export default function JourneyMapScreen({ navigation }: any) {
 
             <View style={{ flex: 2 }} className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
                 <View className="px-4 pt-4 pb-2 flex-row items-center justify-between">
-                    <View>
-                        <Text className="text-gray-900 dark:text-white text-lg font-bold">{journey.destination.name}</Text>
+                    <View className="flex-1 mr-3">
+                        <Text
+                            className="text-gray-900 dark:text-white text-lg font-bold"
+                            numberOfLines={1}
+                        >
+                            {journey.destination.name}
+                        </Text>
                         <Text className="text-gray-500 text-xs uppercase tracking-widest">
                             {members.length} {members.length === 1 ? 'member' : 'members'}
                             {(journey.stops?.length ?? 0) > 0
@@ -284,7 +291,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                     <TouchableOpacity
                         onPress={handleEndOrLeave}
                         disabled={isEnding}
-                        className="bg-red-600/20 border border-red-600/40 px-4 py-2 rounded-xl"
+                        className="bg-red-600/20 border border-red-600/40 px-4 py-2 rounded-xl flex-shrink-0"
                     >
                         {isEnding ? (
                             <ActivityIndicator color="#ef4444" size="small" />
@@ -337,35 +344,50 @@ export default function JourneyMapScreen({ navigation }: any) {
                         ))}
                     </ScrollView>
                 ) : (
-                    <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-                        {(journey.stops ?? []).map((stop, index) => (
-                            <View
-                                key={`${stop.lat}-${stop.lng}-${index}`}
-                                className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700"
-                            >
-                                <View className="w-10 h-10 rounded-full bg-orange-500 items-center justify-center">
-                                    <Text className="text-white font-bold">{index + 1}</Text>
+                    <View className="flex-1">
+                        {role === 'creator' && (
+                            <View className="px-4 pb-2">
+                                <TouchableOpacity
+                                    onPress={() => setEditStopsVisible(true)}
+                                    className="flex-row items-center justify-center bg-blue-600/10 border border-blue-600/30 rounded-xl py-2.5"
+                                >
+                                    <Ionicons name="create-outline" size={16} color="#3b82f6" />
+                                    <Text className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                        Edit Route
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+                            {(journey.stops ?? []).map((stop, index) => (
+                                <View
+                                    key={`${stop.lat}-${stop.lng}-${index}`}
+                                    className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700"
+                                >
+                                    <View className="w-10 h-10 rounded-full bg-orange-500 items-center justify-center">
+                                        <Text className="text-white font-bold">{index + 1}</Text>
+                                    </View>
+                                    <Text
+                                        className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
+                                        numberOfLines={1}
+                                    >
+                                        {stop.name}
+                                    </Text>
+                                </View>
+                            ))}
+                            <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 px-4 py-3 rounded-2xl">
+                                <View className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center">
+                                    <Ionicons name="flag" size={18} color="#fff" />
                                 </View>
                                 <Text
                                     className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
                                     numberOfLines={1}
                                 >
-                                    {stop.name}
+                                    {journey.destination.name}
                                 </Text>
                             </View>
-                        ))}
-                        <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 px-4 py-3 rounded-2xl">
-                            <View className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center">
-                                <Ionicons name="flag" size={18} color="#fff" />
-                            </View>
-                            <Text
-                                className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
-                                numberOfLines={1}
-                            >
-                                {journey.destination.name}
-                            </Text>
-                        </View>
-                    </ScrollView>
+                        </ScrollView>
+                    </View>
                 )}
             </View>
 
@@ -377,6 +399,16 @@ export default function JourneyMapScreen({ navigation }: any) {
                     </TouchableOpacity>
                 </View>
             </Modal>
+
+            {role === 'creator' && (
+                <EditStopsModal
+                    visible={editStopsVisible}
+                    onClose={() => setEditStopsVisible(false)}
+                    journeyId={journey.id}
+                    destination={journey.destination}
+                    initialStops={journey.stops ?? []}
+                />
+            )}
         </SafeAreaView>
     );
 }

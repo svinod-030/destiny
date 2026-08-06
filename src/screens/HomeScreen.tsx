@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput, Keyboard, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, LongPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -10,7 +10,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useThemeColors } from '../utils/theme';
-import { sortByDistanceFromPoint } from '../utils/geo';
+import { distanceInMeters, sortByDistanceFromPoint } from '../utils/geo';
+import { StopsDragList } from '../components/StopsDragList';
 
 interface SelectedPoint {
     id: string;
@@ -28,6 +29,10 @@ const DEFAULT_REGION = {
 
 const MIN_QUERY_LENGTH = 3;
 const AUTOCOMPLETE_DEBOUNCE_MS = 300;
+
+// Points closer together than this are treated as "the same place" and
+// rejected as a duplicate stop/destination rather than added again.
+const DUPLICATE_THRESHOLD_METERS = 50;
 
 const newPointId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -52,6 +57,12 @@ export default function HomeScreen({ navigation }: any) {
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
     const colors = useThemeColors();
+
+    // Checked synchronously against the ref (rather than inside the setState
+    // updater) so call sites can decide right away whether to show a "already
+    // added" alert instead of silently adding a duplicate.
+    const isDuplicatePoint = (lat: number, lng: number) =>
+        selectedPointsRef.current.some((p) => distanceInMeters(p.lat, p.lng, lat, lng) < DUPLICATE_THRESHOLD_METERS);
 
     const addPoint = (point: SelectedPoint) => {
         setSelectedPoints((prev) => {
@@ -85,20 +96,12 @@ export default function HomeScreen({ navigation }: any) {
         });
     };
 
-    // Moves a stop earlier/later among the other stops (index 0 is always the
-    // destination and is never reordered by this).
-    const moveStop = (id: string, direction: 'up' | 'down') => {
-        setSelectedPoints((prev) => {
-            const index = prev.findIndex((p) => p.id === id);
-            if (index < 1) return prev;
-            const targetIndex = direction === 'up' ? index - 1 : index + 1;
-            if (targetIndex < 1 || targetIndex >= prev.length) return prev;
-
-            const updated = [...prev];
-            [updated[index], updated[targetIndex]] = [updated[targetIndex], updated[index]];
-            selectedPointsRef.current = updated;
-            return updated;
-        });
+    // Applies a drag-and-drop reorder across the whole list, destination included -
+    // "destination" just means "whichever point is at index 0", so dragging any
+    // stop into that slot is how the user picks a new destination.
+    const reorderPoints = (reordered: SelectedPoint[]) => {
+        selectedPointsRef.current = reordered;
+        setSelectedPoints(reordered);
     };
 
     useEffect(() => {
@@ -182,6 +185,10 @@ export default function HomeScreen({ navigation }: any) {
     const handleLongPress = async (event: LongPressEvent) => {
         setSuggestions([]);
         const { coordinate } = event.nativeEvent;
+        if (isDuplicatePoint(coordinate.latitude, coordinate.longitude)) {
+            Alert.alert('Already added', 'That location is already part of this journey.');
+            return;
+        }
         const id = newPointId();
         addPoint({ id, name: '', lat: coordinate.latitude, lng: coordinate.longitude });
         try {
@@ -204,6 +211,10 @@ export default function HomeScreen({ navigation }: any) {
             const details = await placesService.getPlaceDetails(suggestion.placeId, sessionTokenRef.current);
             sessionTokenRef.current = placesService.newSessionToken();
             if (!details) return;
+            if (isDuplicatePoint(details.lat, details.lng)) {
+                Alert.alert('Already added', 'That location is already part of this journey.');
+                return;
+            }
             addPoint({
                 id: newPointId(),
                 name: details.name || suggestion.primaryText,
@@ -230,6 +241,10 @@ export default function HomeScreen({ navigation }: any) {
             }
 
             const { latitude, longitude } = results[0];
+            if (isDuplicatePoint(latitude, longitude)) {
+                Alert.alert('Already added', 'That location is already part of this journey.');
+                return;
+            }
             addPoint({ id: newPointId(), name: query, lat: latitude, lng: longitude });
             setSearchQuery('');
             sessionTokenRef.current = placesService.newSessionToken();
@@ -287,7 +302,10 @@ export default function HomeScreen({ navigation }: any) {
     // running with no one updating it). Send them back to it instead.
     if (activeJourneyId) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8">
+            <SafeAreaView
+                className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8"
+                edges={['left', 'right']}
+            >
                 <View className="bg-blue-600/20 p-6 rounded-full mb-6">
                     <Ionicons name="navigate" size={60} color="#3b82f6" />
                 </View>
@@ -314,7 +332,7 @@ export default function HomeScreen({ navigation }: any) {
     const stopPoints = selectedPoints.slice(1);
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['left', 'right']}>
             <View className="px-4 pt-4 pb-2">
                 <Text className="text-gray-900 dark:text-white text-2xl font-bold">Start a Journey</Text>
                 <Text className="text-gray-500 dark:text-gray-400 mt-1">
@@ -355,8 +373,11 @@ export default function HomeScreen({ navigation }: any) {
                     </MapView>
                 </View>
 
-                {/* Floating search, overlaid on the map like the Google Maps app */}
-                <View className="absolute top-3 left-3 right-3">
+                {/* Floating search, overlaid on the map like the Google Maps app. zIndex/elevation
+                    keep it painting above everything else on screen, and the suggestions list is
+                    height-capped with its own internal scroll so it can never grow tall enough to
+                    bleed into the destination/stops panel below. */}
+                <View className="absolute top-3 left-3 right-3" style={{ zIndex: 30, elevation: 8 }}>
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -378,6 +399,7 @@ export default function HomeScreen({ navigation }: any) {
                         <View
                             className="mt-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
                             style={{
+                                maxHeight: 240,
                                 shadowColor: '#000',
                                 shadowOpacity: 0.3,
                                 shadowRadius: 8,
@@ -385,109 +407,61 @@ export default function HomeScreen({ navigation }: any) {
                                 elevation: 4,
                             }}
                         >
-                            {suggestions.map((item, index) => (
-                                <TouchableOpacity
-                                    key={item.placeId}
-                                    onPress={() => handleSelectSuggestion(item)}
-                                    className={`px-4 py-3 flex-row items-center active:bg-gray-100 dark:active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
-                                        }`}
-                                >
-                                    <Ionicons name="location-outline" size={18} color="#3b82f6" />
-                                    <View className="ml-3 flex-1">
-                                        <Text className="text-gray-900 dark:text-white font-semibold" numberOfLines={1}>
-                                            {item.primaryText}
-                                        </Text>
-                                        {!!item.secondaryText && (
-                                            <Text className="text-gray-500 text-xs" numberOfLines={1}>
-                                                {item.secondaryText}
+                            <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled>
+                                {suggestions.map((item, index) => (
+                                    <TouchableOpacity
+                                        key={item.placeId}
+                                        onPress={() => handleSelectSuggestion(item)}
+                                        className={`px-4 py-3 flex-row items-center active:bg-gray-100 dark:active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
+                                            }`}
+                                    >
+                                        <Ionicons name="location-outline" size={18} color="#3b82f6" />
+                                        <View className="ml-3 flex-1">
+                                            <Text className="text-gray-900 dark:text-white font-semibold" numberOfLines={1}>
+                                                {item.primaryText}
                                             </Text>
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+                                            {!!item.secondaryText && (
+                                                <Text className="text-gray-500 text-xs" numberOfLines={1}>
+                                                    {item.secondaryText}
+                                                </Text>
+                                            )}
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
                         </View>
                     )}
                 </View>
             </View>
 
-            <View className="p-4">
-                {destinationPoint && (
-                    <View className="mb-3">
-                        <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1.5 tracking-[3px] ml-1">
-                            Destination
-                        </Text>
-                        <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 rounded-2xl px-3 py-3">
-                            <View className="w-7 h-7 rounded-full bg-blue-600 items-center justify-center">
-                                <Ionicons name="flag" size={14} color="#fff" />
-                            </View>
-                            <Text
-                                className="text-gray-900 dark:text-white ml-3 text-base font-semibold flex-1"
-                                numberOfLines={1}
-                            >
-                                {destinationPoint.name.trim() || 'Destination'}
+            {/* Capped to a fraction of the screen so the map always keeps a sensible size and,
+                with many stops, the list scrolls internally instead of pushing content off-screen. */}
+            <View style={{ maxHeight: '46%' }} className="px-4 pt-2">
+                <ScrollView
+                    style={{ flexGrow: 0, flexShrink: 1 }}
+                    contentContainerStyle={{ paddingBottom: 12 }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    {selectedPoints.length > 0 && (
+                        <View className="mb-3">
+                            <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1.5 tracking-[3px] ml-1">
+                                {selectedPoints.length > 1 ? 'Drag to reorder or set destination' : 'Destination'}
                             </Text>
-                            <TouchableOpacity onPress={() => removePoint(destinationPoint.id)} className="p-1">
-                                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
-                            </TouchableOpacity>
+                            <StopsDragList
+                                stops={selectedPoints}
+                                onReorder={reorderPoints}
+                                onRemove={removePoint}
+                                firstIsDestination
+                            />
                         </View>
-                    </View>
-                )}
-
-                {stopPoints.length > 0 && (
-                    <View className="mb-3">
-                        <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1.5 tracking-[3px] ml-1">
-                            Stops · In Order
-                        </Text>
-                        <View className="gap-2">
-                            {stopPoints.map((stop, index) => (
-                                <View
-                                    key={stop.id}
-                                    className="flex-row items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl pl-3 pr-1 py-2"
-                                >
-                                    <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center">
-                                        <Text className="text-white font-bold text-xs">{index + 1}</Text>
-                                    </View>
-                                    <Text
-                                        className="text-gray-900 dark:text-white ml-3 text-base font-medium flex-1"
-                                        numberOfLines={1}
-                                    >
-                                        {stop.name.trim() || `Stop ${index + 1}`}
-                                    </Text>
-                                    <TouchableOpacity
-                                        onPress={() => moveStop(stop.id, 'up')}
-                                        disabled={index === 0}
-                                        className="p-1.5"
-                                    >
-                                        <Ionicons
-                                            name="chevron-up"
-                                            size={20}
-                                            color={index === 0 ? colors.border : colors.textSecondary}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => moveStop(stop.id, 'down')}
-                                        disabled={index === stopPoints.length - 1}
-                                        className="p-1.5"
-                                    >
-                                        <Ionicons
-                                            name="chevron-down"
-                                            size={20}
-                                            color={index === stopPoints.length - 1 ? colors.border : colors.textSecondary}
-                                        />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => removePoint(stop.id)} className="p-1.5">
-                                        <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                )}
+                    )}
+                </ScrollView>
 
                 <TouchableOpacity
                     onPress={handleCreate}
                     disabled={selectedPoints.length === 0 || isCreating}
-                    className={`p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                    className={`mb-4 p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
                         }`}
                 >
                     {isCreating ? (

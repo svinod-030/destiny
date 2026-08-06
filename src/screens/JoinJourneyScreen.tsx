@@ -93,7 +93,10 @@ export default function JoinJourneyScreen({ navigation }: any) {
     // running with no one updating it). Send them back to it instead.
     if (activeJourneyId) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8">
+            <SafeAreaView
+                className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8"
+                edges={['left', 'right']}
+            >
                 <View className="bg-blue-600/20 p-6 rounded-full mb-6">
                     <Ionicons name="navigate" size={60} color="#3b82f6" />
                 </View>
@@ -117,7 +120,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
