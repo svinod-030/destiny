@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229898105195",
+    "project_id": "destiny-fb",
+    "storage_bucket": "destiny-fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229898105195:android:96c75307cffb33f330dc2e",
+        "android_client_info": {
+          "package_name": "com.vinodsigadana.destiny"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7xDvKjLqwPAnzsZSSaUXoZ6s3OJeD-A4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

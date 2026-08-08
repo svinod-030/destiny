@@ -53,7 +53,9 @@ render.experimental.xml
 *.keystore
 
 # Google Services (e.g. APIs or Firebase)
-google-services.json
+# google-services.json is intentionally committed - its API key is
+# Application + API restricted in Google Cloud Console, which per Firebase's
+# own guidance means it doesn't need to be treated as a secret.
 GoogleService-Info.plist
 
 # Android Profiling
