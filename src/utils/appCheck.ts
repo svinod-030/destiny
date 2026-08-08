@@ -39,15 +39,23 @@ export function setupAppCheck() {
         isTokenAutoRefreshEnabled: true,
         provider: new CustomProvider({
             getToken: async () => {
-                const result = await getNativeAppCheckToken(nativeAppCheck);
-                return {
-                    token: result.token,
-                    // RNFirebase's getToken() doesn't expose the real expiry
-                    // here - this TTL only controls how often the JS SDK
-                    // re-invokes this provider; actual attestation/refresh is
-                    // managed natively above.
-                    expireTimeMillis: Date.now() + 30 * 60 * 1000,
-                };
+                try {
+                    const result = await getNativeAppCheckToken(nativeAppCheck);
+                    return {
+                        token: result.token,
+                        // RNFirebase's getToken() doesn't expose the real expiry
+                        // here - this TTL only controls how often the JS SDK
+                        // re-invokes this provider; actual attestation/refresh is
+                        // managed natively above.
+                        expireTimeMillis: Date.now() + 30 * 60 * 1000,
+                    };
+                } catch (error) {
+                    // Without this, a failing native attestation call surfaces
+                    // only as a generic "MISSING or invalid token" server-side,
+                    // with no clue why - this is the actual underlying error.
+                    console.error('[appCheck] native token fetch failed:', error);
+                    throw error;
+                }
             },
         }),
     });

@@ -28,7 +28,7 @@ const DAILY_REQUEST_LIMIT = 300;
 // call actually arrived with a valid token - once Cloud Functions logs show
 // the app's real traffic consistently has one, flip this to true and
 // redeploy to start rejecting everything else.
-const ENFORCE_APP_CHECK = false;
+const ENFORCE_APP_CHECK = true;
 
 interface LatLng {
     lat: number;
