@@ -9,6 +9,7 @@ import UpdateModal from './src/components/UpdateModal';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
 import { checkVersion } from './src/utils/versionCheckService';
+import { setupAppCheck } from './src/utils/appCheck';
 import './src/tasks/locationTask';
 
 // Ensures the "journey in progress" notification stays visible even if the
@@ -21,6 +22,10 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
+
+// As early as possible, before any Firestore/Functions calls fire, so every
+// request in the app carries an App Check token from the start.
+setupAppCheck();
 
 export default function App() {
   const isReady = useAuthStore((state) => state.isReady);

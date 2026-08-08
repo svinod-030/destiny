@@ -1,5 +1,9 @@
 PODS:
+  - EXApplication (7.0.8):
+    - ExpoModulesCore
   - EXConstants (18.0.13):
+    - ExpoModulesCore
+  - EXNotifications (0.32.17):
     - ExpoModulesCore
   - Expo (54.0.36):
     - ExpoModulesCore
@@ -63,6 +67,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - EXTaskManager (14.0.9):
+    - ExpoModulesCore
+    - UMAppLoader
   - FBLazyVector (0.81.5)
   - hermes-engine (0.81.5):
     - hermes-engine/Pre-built (= 0.81.5)
@@ -1417,6 +1424,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-view-shot (4.0.3):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - React-NativeModulesApple (0.81.5):
     - hermes-engine
     - React-callinvoker
@@ -1789,6 +1818,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNDeviceInfo (10.3.0):
+    - React-Core
   - RNReanimated (4.1.7):
     - hermes-engine
     - RCTRequired
@@ -1902,6 +1933,28 @@ PODS:
     - React-NativeModulesApple
     - React-RCTFabric
     - React-RCTImage
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+  - RNShare (12.3.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
     - React-renderercss
     - React-rendererdebug
     - React-utils
@@ -2026,6 +2079,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - UMAppLoader (6.0.8)
   - Yoga (0.0.0)
   - ZXingObjC/Core (3.6.9)
   - ZXingObjC/OneD (3.6.9):
@@ -2034,7 +2088,9 @@ PODS:
     - ZXingObjC/Core
 
 DEPENDENCIES:
+  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
+  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoCamera (from `../node_modules/expo-camera/ios`)
@@ -2043,6 +2099,7 @@ DEPENDENCIES:
   - ExpoKeepAwake (from `../node_modules/expo/node_modules/expo-keep-awake/ios`)
   - ExpoLocation (from `../node_modules/expo-location/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
+  - EXTaskManager (from `../node_modules/expo-task-manager/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
@@ -2081,6 +2138,7 @@ DEPENDENCIES:
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-view-shot (from `../node_modules/react-native-view-shot`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -2113,10 +2171,13 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
+  - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2124,8 +2185,12 @@ SPEC REPOS:
     - ZXingObjC
 
 EXTERNAL SOURCES:
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
+  EXNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoAsset:
@@ -2142,6 +2207,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-location/ios"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
+  EXTaskManager:
+    :path: "../node_modules/expo-task-manager/ios"
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   hermes-engine:
@@ -2217,6 +2284,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-maps"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-view-shot:
+    :path: "../node_modules/react-native-view-shot"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -2281,19 +2350,27 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNShare:
+    :path: "../node_modules/react-native-share"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
+  UMAppLoader:
+    :path: "../node_modules/unimodules-app-loader/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  EXApplication: 1e98d4b1dccdf30627f92917f4b2c5a53c330e5f
   EXConstants: fce59a631a06c4151602843667f7cfe35f81e271
+  EXNotifications: c67e92b9fdfe785ff9dbdc5f4c0ff935de357da7
   Expo: 38ef0f0082a53f9604a48cbab2ab55289c658eaf
   ExpoAsset: 9e5a7c9c0a9fb83ad5b2bb365141f2bd7f289b66
   ExpoCamera: 6a326deb45ba840749652e4c15198317aa78497e
@@ -2302,6 +2379,7 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: 55f75eca6499bb9e4231ebad6f3e9cb8f99c0296
   ExpoLocation: d5b61cb4970fa982e39ca94246a206a0c3b812ca
   ExpoModulesCore: 9e6a5514828e7dd5ded9e99d33557be2d284e660
+  EXTaskManager: 6f1a66e4c8cc6df6e24c3d90928704bc3013eae5
   FBLazyVector: e95a291ad2dadb88e42b06e0c5fb8262de53ec12
   hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
   RCTDeprecation: 943572d4be82d480a48f4884f670135ae30bf990
@@ -2339,6 +2417,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: f775db9e991c6f3b8ccbc02bfcde22770f96e23b
   react-native-maps: 9febd31278b35cd21e4fad2cf6fa708993be5dab
   react-native-safe-area-context: 37e680fc4cace3c0030ee46e8987d24f5d3bdab2
+  react-native-view-shot: fb3c0774edb448f42705491802a455beac1502a2
   React-NativeModulesApple: 8969913947d5b576de4ed371a939455a8daf28aa
   React-oscompat: ce47230ed20185e91de62d8c6d139ae61763d09c
   React-perflogger: 02b010e665772c7dcb859d85d44c1bfc5ac7c0e4
@@ -2371,10 +2450,13 @@ SPEC CHECKSUMS:
   ReactCommon: 08810150b1206cc44aecf5f6ae19af32f29151a8
   ReactNativeDependencies: 71ce9c28beb282aa720ea7b46980fff9669f428a
   RNCAsyncStorage: 3a4f5e2777dae1688b781a487923a08569e27fe4
+  RNDeviceInfo: 32413a6eefa0de704834b9d2afe5be596b44a66d
   RNReanimated: 41f496c18437fd0aa841234917af84e98fd5b9a2
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
+  RNShare: bedb237f4fc22851d14d4d30dee152950b289274
   RNSVG: 31d6639663c249b7d5abc9728dde2041eb2a3c34
   RNWorklets: 76fce72926e28e304afb44f0da23b2d24f2c1fa0
+  UMAppLoader: 145337733539f9af9b3dd97eeaa7f3bd97cacb23
   Yoga: 5934998fbeaef7845dbf698f698518695ab4cd1a
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 

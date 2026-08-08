@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { initializeFirestore } from 'firebase/firestore';
 // @ts-expect-error - getReactNativePersistence is not exported in some environments but is available at runtime in RN
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getFunctions } from 'firebase/functions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -13,7 +14,7 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage as any),
@@ -22,3 +23,6 @@ export const auth = initializeAuth(app, {
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
+
+// Region must match where functions/src/index.ts deploys to (see REGION there).
+export const functions = getFunctions(app, 'asia-south1');
