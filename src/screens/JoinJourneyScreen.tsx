@@ -15,7 +15,8 @@ import {
     Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions, scanFromURLAsync } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useJourneySync } from '../hooks/useJourneySync';
 import { useAuthStore } from '../store/useAuthStore';
@@ -35,6 +36,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
+    const [isReadingImage, setIsReadingImage] = useState(false);
 
     const handleRequestPermission = async () => {
         if (permission?.granted) {
@@ -60,6 +62,35 @@ export default function JoinJourneyScreen({ navigation }: any) {
         setCodeInput(data);
         if (data && data.length >= 4) {
             handleJoin(data);
+        }
+    };
+
+    // Lets someone join from a QR code they already have as a photo (e.g. a
+    // screenshot sent in chat) instead of needing to point the camera at it live.
+    const handlePickFromGallery = async () => {
+        try {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permissionResult.granted) {
+                Alert.alert('Photos permission needed', 'Allow Destiny to access your photos to upload a QR code.');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'] });
+            if (result.canceled || !result.assets?.[0]) return;
+
+            setIsReadingImage(true);
+            const results = await scanFromURLAsync(result.assets[0].uri, ['qr']);
+            if (results.length === 0) {
+                Alert.alert('No QR code found', "We couldn't find a QR code in that image. Try a clearer photo.");
+                return;
+            }
+
+            handleBarCodeScanned({ data: results[0].data });
+        } catch (error) {
+            console.error('Failed to read QR code from image:', error);
+            Alert.alert('Error', 'Could not read that image. Please try again.');
+        } finally {
+            setIsReadingImage(false);
         }
     };
 
@@ -205,6 +236,17 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                     <View style={styles.overlay}>
                                         <View style={styles.header}>
                                             <TouchableOpacity
+                                                onPress={handlePickFromGallery}
+                                                disabled={isReadingImage}
+                                                className="p-4 rounded-full bg-black/40 mr-3"
+                                            >
+                                                {isReadingImage ? (
+                                                    <ActivityIndicator color="#fff" size="small" />
+                                                ) : (
+                                                    <Ionicons name="image-outline" size={26} color="#fff" />
+                                                )}
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
                                                 onPress={() => setIsScanning(false)}
                                                 className="p-4 rounded-full bg-black/40"
                                             >
@@ -221,6 +263,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
 
                                         <Text style={styles.scanText}>Scan QR Code</Text>
                                         <Text style={styles.scanSubText}>Align the QR code within the frame</Text>
+                                        <Text style={styles.scanSubText}>or tap the image icon to upload one</Text>
                                     </View>
                                 </View>
                             </Modal>
@@ -235,7 +278,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     scannerContainer: { flex: 1, backgroundColor: '#000' },
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
-    header: { position: 'absolute', top: 60, right: 20, zIndex: 10 },
+    header: { position: 'absolute', top: 60, right: 20, zIndex: 10, flexDirection: 'row' },
     scanFrame: { width: 280, height: 280, backgroundColor: 'transparent' },
     cornerTopLeft: {
         position: 'absolute', top: 0, left: 0, width: 40, height: 40,
