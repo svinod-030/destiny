@@ -21,11 +21,13 @@ interface SelectedPoint {
     lng: number;
 }
 
+// Shown before the user's location or a destination is known - centered on
+// India's geographic center, zoomed out to frame the whole country.
 const DEFAULT_REGION = {
-    latitude: 12.9716,
-    longitude: 77.5946,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
+    latitude: 22.9734,
+    longitude: 78.6569,
+    latitudeDelta: 20,
+    longitudeDelta: 20,
 };
 
 const MIN_QUERY_LENGTH = 3;
