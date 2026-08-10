@@ -9,6 +9,7 @@ import { placesService, PlaceSuggestion } from '../services/placesService';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
+import { useStopsTipStore } from '../store/useStopsTipStore';
 import { useThemeColors } from '../utils/theme';
 import { distanceInMeters, sortByDistanceFromPoint } from '../utils/geo';
 import { StopsDragList } from '../components/StopsDragList';
@@ -56,6 +57,8 @@ export default function HomeScreen({ navigation }: any) {
     const activeJourneyId = useJourneyStore((state) => state.journeyId);
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
+    const hasSeenStopsTip = useStopsTipStore((state) => state.hasSeenStopsTip);
+    const markStopsTipSeen = useStopsTipStore((state) => state.markSeen);
     const colors = useThemeColors();
 
     // Checked synchronously against the ref (rather than inside the setState
@@ -254,7 +257,27 @@ export default function HomeScreen({ navigation }: any) {
         }
     };
 
-    const handleCreate = async () => {
+    // The first time anyone starts a journey with no stops added, offer a quick
+    // way to add one before committing - after that, it's assumed they know the
+    // feature exists and starting without stops just proceeds normally.
+    const handleCreate = () => {
+        if (selectedPoints.length === 0) return;
+        if (stopPoints.length === 0 && !hasSeenStopsTip) {
+            markStopsTipSeen();
+            Alert.alert(
+                'Add stops along the way?',
+                'You can add intermediate stops before starting - just search or long-press the map again after your destination.',
+                [
+                    { text: 'Add a Stop', style: 'cancel' },
+                    { text: 'Start Without Stops', onPress: () => createJourneyNow() },
+                ]
+            );
+            return;
+        }
+        createJourneyNow();
+    };
+
+    const createJourneyNow = async () => {
         if (selectedPoints.length === 0) return;
         if (!uid) {
             Alert.alert(
@@ -454,6 +477,14 @@ export default function HomeScreen({ navigation }: any) {
                                 onRemove={removePoint}
                                 firstIsDestination
                             />
+                            {selectedPoints.length === 1 && (
+                                <View className="flex-row items-center bg-amber-500/10 border border-amber-500/20 rounded-2xl px-3 py-2.5 mt-3">
+                                    <Ionicons name="bulb-outline" size={16} color="#f59e0b" />
+                                    <Text className="text-amber-700 dark:text-amber-400 text-xs ml-2 flex-1">
+                                        Tip: search or long-press the map again to add stops along the way
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     )}
                 </ScrollView>
