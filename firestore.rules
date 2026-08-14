@@ -28,5 +28,12 @@ service cloud.firestore {
         )
       );
     }
+
+    match /config/{document} {
+      // App-wide feature flags (e.g. adsEnabled). Read-only from the client -
+      // flipped manually via Firebase Console/CLI, acting as a remote
+      // kill-switch that doesn't require an app store release.
+      allow read: if request.auth != null;
+    }
   }
 }

@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore, ThemePreference } from '../store/useThemeStore';
 import { useThemeColors } from '../utils/theme';
 import { APP_CONFIG } from '../utils/constants';
+import AdBanner from '../components/AdBanner';
 
 const APPEARANCE_OPTIONS: { value: ThemePreference; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { value: 'light', label: 'Light', icon: 'sunny-outline' },
@@ -151,6 +152,7 @@ export default function SettingsScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+            <AdBanner />
         </SafeAreaView>
     );
 }

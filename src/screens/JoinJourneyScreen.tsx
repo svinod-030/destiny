@@ -23,6 +23,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useThemeColors } from '../utils/theme';
+import AdBanner from '../components/AdBanner';
 
 export default function JoinJourneyScreen({ navigation }: any) {
     const [codeInput, setCodeInput] = useState('');
@@ -219,6 +220,8 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 </View>
                             )}
                         </View>
+
+                        <AdBanner />
 
                         {isScanning && (
                             <Modal

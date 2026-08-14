@@ -6,6 +6,7 @@ import { useJourneyHistoryStore, JourneyHistoryEntry } from '../store/useJourney
 import { useJourneyStore } from '../store/useJourneyStore';
 import { journeyService } from '../services/journeyService';
 import { useThemeColors } from '../utils/theme';
+import AdBanner from '../components/AdBanner';
 
 export default function JourneyHistoryScreen({ navigation }: any) {
     const entries = useJourneyHistoryStore((state) => state.entries);
@@ -93,6 +94,7 @@ export default function JourneyHistoryScreen({ navigation }: any) {
                     contentContainerStyle={{ padding: 16 }}
                 />
             )}
+            <AdBanner />
         </SafeAreaView>
     );
 }

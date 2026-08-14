@@ -16,6 +16,7 @@ import { EditStopsModal } from '../components/EditStopsModal';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification } from '../utils/journeyNotification';
 import { getInitials } from '../utils/color';
+import AdBanner from '../components/AdBanner';
 
 const getFitCoordinates = (journey: Journey) => [
     { latitude: journey.destination.lat, longitude: journey.destination.lng },
@@ -390,6 +391,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                     </View>
                 )}
             </View>
+
+            <AdBanner />
 
             <Modal visible={shareVisible} transparent animationType="fade" onRequestClose={() => setShareVisible(false)}>
                 <View className="flex-1 bg-black/70 justify-center items-center px-6">

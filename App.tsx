@@ -8,8 +8,10 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import UpdateModal from './src/components/UpdateModal';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
+import { useAdConfigStore } from './src/store/useAdConfigStore';
 import { checkVersion } from './src/utils/versionCheckService';
 import { setupAppCheck } from './src/utils/appCheck';
+import { featureConfigService } from './src/services/featureConfigService';
 import './src/tasks/locationTask';
 
 // Ensures the "journey in progress" notification stays visible even if the
@@ -49,6 +51,19 @@ export default function App() {
         setShowUpdateModal(true);
       }
     });
+  }, [isReady]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    const unsubscribe = featureConfigService.subscribeToFeatureConfig(
+      (config) => {
+        useAdConfigStore.getState().setAdsEnabled(config.adsEnabled);
+      },
+      (error) => {
+        console.error('Failed to subscribe to feature config:', error);
+      }
+    );
+    return unsubscribe;
   }, [isReady]);
 
   if (!isReady) {
