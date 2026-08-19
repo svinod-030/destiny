@@ -9,9 +9,11 @@ import UpdateModal from './src/components/UpdateModal';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
 import { useAdConfigStore } from './src/store/useAdConfigStore';
+import { useJourneyHistoryStore } from './src/store/useJourneyHistoryStore';
 import { checkVersion } from './src/utils/versionCheckService';
 import { setupAppCheck } from './src/utils/appCheck';
 import { featureConfigService } from './src/services/featureConfigService';
+import { journeyHistoryService } from './src/services/journeyHistoryService';
 import './src/tasks/locationTask';
 
 // Ensures the "journey in progress" notification stays visible even if the
@@ -31,6 +33,7 @@ setupAppCheck();
 
 export default function App() {
   const isReady = useAuthStore((state) => state.isReady);
+  const uid = useAuthStore((state) => state.uid);
   const name = useAuthStore((state) => state.name);
   const init = useAuthStore((state) => state.init);
   const hasSeenOnboarding = useOnboardingStore((state) => state.hasSeenOnboarding);
@@ -65,6 +68,20 @@ export default function App() {
     );
     return unsubscribe;
   }, [isReady]);
+
+  useEffect(() => {
+    if (!isReady || !uid) return;
+    const unsubscribe = journeyHistoryService.subscribeToEntries(
+      uid,
+      (entries) => {
+        entries.forEach((entry) => useJourneyHistoryStore.getState().addEntry(entry));
+      },
+      (error) => {
+        console.error('Failed to subscribe to journey history:', error);
+      }
+    );
+    return unsubscribe;
+  }, [isReady, uid]);
 
   if (!isReady) {
     return (

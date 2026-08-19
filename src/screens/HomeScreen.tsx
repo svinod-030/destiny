@@ -5,6 +5,7 @@ import MapView, { Marker, LongPressEvent } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
+import { journeyHistoryService } from '../services/journeyHistoryService';
 import { placesService, PlaceSuggestion } from '../services/placesService';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
@@ -12,6 +13,7 @@ import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useStopsTipStore } from '../store/useStopsTipStore';
 import { useThemeColors } from '../utils/theme';
 import { distanceInMeters, sortByDistanceFromPoint } from '../utils/geo';
+import { Destination } from '../types/journey';
 import { StopsDragList } from '../components/StopsDragList';
 
 interface SelectedPoint {
@@ -39,7 +41,7 @@ const DUPLICATE_THRESHOLD_METERS = 50;
 
 const newPointId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation, route }: any) {
     const mapRef = useRef<MapView>(null);
     const selectedPointsRef = useRef<SelectedPoint[]>([]);
     const currentLocationRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -108,6 +110,25 @@ export default function HomeScreen({ navigation }: any) {
         selectedPointsRef.current = reordered;
         setSelectedPoints(reordered);
     };
+
+    // Seeds the map from a past journey when arriving via History's "Repeat"
+    // button. Cleared from the route params right after so revisiting this
+    // tab later doesn't re-seed stale data.
+    useEffect(() => {
+        const repeatFrom = route?.params?.repeatFrom as { destination: Destination; stops: Destination[] } | undefined;
+        if (!repeatFrom) return;
+
+        const points: SelectedPoint[] = [repeatFrom.destination, ...repeatFrom.stops].map((d) => ({
+            id: newPointId(),
+            name: d.name,
+            lat: d.lat,
+            lng: d.lng,
+        }));
+        selectedPointsRef.current = points;
+        setSelectedPoints(points);
+        navigation.setParams({ repeatFrom: undefined });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [route?.params?.repeatFrom]);
 
     useEffect(() => {
         (async () => {
@@ -304,12 +325,17 @@ export default function HomeScreen({ navigation }: any) {
 
             const journeyId = await journeyService.createJourney(destination, uid, name, stops);
             setActiveJourney(journeyId, 'creator');
-            addHistoryEntry({
+            const historyEntry = {
                 id: journeyId,
-                destinationName: destination.name,
-                role: 'creator',
-                status: 'active',
+                destination,
+                stops,
+                role: 'creator' as const,
+                status: 'active' as const,
                 startedAt: new Date().toISOString(),
+            };
+            addHistoryEntry(historyEntry);
+            journeyHistoryService.recordEntry(uid, historyEntry).catch((error) => {
+                console.error('Failed to record journey history:', error);
             });
             setSelectedPoints([]);
             selectedPointsRef.current = [];

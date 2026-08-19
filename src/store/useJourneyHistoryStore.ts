@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { JourneyRole } from './useJourneyStore';
+import { Destination } from '../types/journey';
 
 export interface JourneyHistoryEntry {
     id: string;
-    destinationName: string;
+    destination: Destination;
+    stops: Destination[];
     role: JourneyRole;
     status: 'active' | 'ended';
     startedAt: string;

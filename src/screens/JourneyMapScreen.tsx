@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
+import { journeyHistoryService } from '../services/journeyHistoryService';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
@@ -13,6 +14,7 @@ import { distanceInMeters } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { EditStopsModal } from '../components/EditStopsModal';
+import { RouteList } from '../components/RouteList';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification } from '../utils/journeyNotification';
 import { getInitials } from '../utils/color';
@@ -73,12 +75,18 @@ export default function JourneyMapScreen({ navigation }: any) {
                 if (ended) {
                     addHistoryEntry({
                         id: ended.id,
-                        destinationName: ended.destination.name,
+                        destination: ended.destination,
+                        stops: ended.stops ?? [],
                         role: role || 'member',
                         status: 'ended',
                         startedAt: ended.createdAt,
                         endedAt: new Date().toISOString(),
                     });
+                    if (uid) {
+                        journeyHistoryService.markEnded(uid, ended.id).catch((error) => {
+                            console.error('Failed to mark journey history as ended:', error);
+                        });
+                    }
                 }
                 setConnectionError('This journey has ended.');
                 clear();
@@ -156,11 +164,15 @@ export default function JourneyMapScreen({ navigation }: any) {
                             }
                             addHistoryEntry({
                                 id: journey.id,
-                                destinationName: journey.destination.name,
+                                destination: journey.destination,
+                                stops: journey.stops ?? [],
                                 role: role || 'member',
                                 status: 'ended',
                                 startedAt: journey.createdAt,
                                 endedAt: new Date().toISOString(),
+                            });
+                            journeyHistoryService.markEnded(uid, journey.id).catch((error) => {
+                                console.error('Failed to mark journey history as ended:', error);
                             });
                             clear();
                             navigation.navigate('HomeTabs');
@@ -359,34 +371,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 </TouchableOpacity>
                             </View>
                         )}
-                        <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-                            {(journey.stops ?? []).map((stop, index) => (
-                                <View
-                                    key={`${stop.lat}-${stop.lng}-${index}`}
-                                    className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700"
-                                >
-                                    <View className="w-10 h-10 rounded-full bg-orange-500 items-center justify-center">
-                                        <Text className="text-white font-bold">{index + 1}</Text>
-                                    </View>
-                                    <Text
-                                        className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
-                                        numberOfLines={1}
-                                    >
-                                        {stop.name}
-                                    </Text>
-                                </View>
-                            ))}
-                            <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 px-4 py-3 rounded-2xl">
-                                <View className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center">
-                                    <Ionicons name="flag" size={18} color="#fff" />
-                                </View>
-                                <Text
-                                    className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1"
-                                    numberOfLines={1}
-                                >
-                                    {journey.destination.name}
-                                </Text>
-                            </View>
+                        <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: 16 }}>
+                            <RouteList destination={journey.destination} stops={journey.stops ?? []} />
                         </ScrollView>
                     </View>
                 )}

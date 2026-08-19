@@ -19,6 +19,7 @@ import { CameraView, useCameraPermissions, scanFromURLAsync } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useJourneySync } from '../hooks/useJourneySync';
+import { journeyHistoryService } from '../services/journeyHistoryService';
 import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
@@ -109,12 +110,17 @@ export default function JoinJourneyScreen({ navigation }: any) {
         const journey = await joinJourney(code.trim(), uid, name);
         if (journey) {
             setActiveJourney(journey.id, 'member');
-            addHistoryEntry({
+            const historyEntry = {
                 id: journey.id,
-                destinationName: journey.destination.name,
-                role: 'member',
-                status: 'active',
+                destination: journey.destination,
+                stops: journey.stops ?? [],
+                role: 'member' as const,
+                status: 'active' as const,
                 startedAt: journey.createdAt,
+            };
+            addHistoryEntry(historyEntry);
+            journeyHistoryService.recordEntry(uid, historyEntry).catch((error) => {
+                console.error('Failed to record journey history:', error);
             });
             navigation.navigate('JourneyMap');
         }
