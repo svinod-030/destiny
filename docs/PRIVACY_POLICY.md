@@ -57,4 +57,4 @@ We may update this Privacy Policy from time to time. Changes will be posted on t
 
 ## Contact Us
 
-If you have questions about this Privacy Policy, contact us at vinodsigadana030@gmail.com.
+If you have questions about this Privacy Policy, contact us at vinod.sigadana.labs@gmail.com.
