@@ -53,7 +53,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
             setScanned(false);
         } else {
             setTimeout(() => {
-                Alert.alert('Camera permission needed', 'Allow Destiny to access your camera to scan journey codes.');
+                Alert.alert('Camera permission needed', 'Allow ConvoyMates to access your camera to scan journey codes.');
             }, 300);
         }
     };
@@ -73,7 +73,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
         try {
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (!permissionResult.granted) {
-                Alert.alert('Photos permission needed', 'Allow Destiny to access your photos to upload a QR code.');
+                Alert.alert('Photos permission needed', 'Allow ConvoyMates to access your photos to upload a QR code.');
                 return;
             }
 
@@ -102,7 +102,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
         if (!uid) {
             Alert.alert(
                 'Not signed in yet',
-                "We're still connecting you to Destiny. Please wait a moment and try again."
+                "We're still connecting you to ConvoyMates. Please wait a moment and try again."
             );
             return;
         }

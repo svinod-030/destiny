@@ -26,7 +26,7 @@ const LogoTitle = React.memo(({ tint }: { tint: string }) => (
             source={require('../../assets/icon.png')}
             resizeMode="contain"
         />
-        <Text style={{ color: tint, fontWeight: 'bold', fontSize: 20 }}>Destiny</Text>
+        <Text style={{ color: tint, fontWeight: 'bold', fontSize: 20 }}>ConvoyMates</Text>
     </View>
 ));
 

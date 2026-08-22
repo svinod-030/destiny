@@ -112,7 +112,7 @@ export default function JourneyMapScreen({ navigation }: any) {
         if (permissionDenied) {
             Alert.alert(
                 'Location permission needed',
-                'Allow Destiny to access your location so the group can see you on the map.'
+                'Allow ConvoyMates to access your location so the group can see you on the map.'
             );
         }
     }, [permissionDenied]);
@@ -121,7 +121,7 @@ export default function JourneyMapScreen({ navigation }: any) {
         if (!showBackgroundPrompt) return;
         Alert.alert(
             'Keep sharing while you multitask?',
-            "Allow Destiny to access your location ‘Always’ so your group can keep seeing your live position even if you switch to another app, like Maps for directions. Otherwise, your location will only update while Destiny is open.",
+            "Allow ConvoyMates to access your location ‘Always’ so your group can keep seeing your live position even if you switch to another app, like Maps for directions. Otherwise, your location will only update while ConvoyMates is open.",
             [
                 { text: 'Not Now', style: 'cancel', onPress: dismissBackgroundPrompt },
                 { text: 'Enable', onPress: () => enableBackgroundTracking() },

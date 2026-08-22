@@ -16,7 +16,7 @@ const ensureChannel = async () => {
 
 // A persistent (non-swipeable) notification shown only while location is being
 // shared in the background, so it's always obvious to the user that tracking
-// is still active even when Destiny isn't the app on screen.
+// is still active even when ConvoyMates isn't the app on screen.
 export const showJourneyNotification = async () => {
     try {
         const { status } = await Notifications.getPermissionsAsync();

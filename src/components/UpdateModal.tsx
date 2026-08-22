@@ -27,7 +27,7 @@ export default function UpdateModal({ visible, onClose, storeVersion }: UpdateMo
                         Update Available
                     </Text>
                     <Text className="text-gray-500 dark:text-gray-400 text-center mb-6 leading-5">
-                        A new version{storeVersion ? ` (${storeVersion})` : ''} of Destiny is available with new
+                        A new version{storeVersion ? ` (${storeVersion})` : ''} of ConvoyMates is available with new
                         features and improvements.
                     </Text>
 

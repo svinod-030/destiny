@@ -1,4 +1,4 @@
-# Destiny
+# ConvoyMates
 
 Track a group's live location on the way to a shared destination. One person starts a
 journey by dropping a pin, everyone else joins with a 6-character code (or by scanning a

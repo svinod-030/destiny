@@ -19,10 +19,10 @@ export const ShareJourneyCard: React.FC<ShareJourneyCardProps> = ({ journeyId })
         setIsSharing(true);
         try {
             const uri = await viewShotRef.current?.capture?.();
-            const message = `Join my journey on Destiny! Enter this code: ${journeyId}\n\nDon't have the app? Download it here: ${PLAY_STORE_URL}`;
+            const message = `Join my journey on ConvoyMates! Enter this code: ${journeyId}\n\nDon't have the app? Download it here: ${PLAY_STORE_URL}`;
 
             await Share.open({
-                title: 'Join my journey on Destiny',
+                title: 'Join my journey on ConvoyMates',
                 message,
                 url: uri,
                 type: 'image/png',

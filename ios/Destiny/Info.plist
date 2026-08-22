@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>Destiny</string>
+    <string>ConvoyMates</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -47,13 +47,13 @@
       <true/>
     </dict>
     <key>NSCameraUsageDescription</key>
-    <string>Allow Destiny to access your camera to scan journey QR codes.</string>
+    <string>Allow ConvoyMates to access your camera to scan journey QR codes.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow Destiny to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
+    <string>Allow ConvoyMates to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow Destiny to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
+    <string>Allow ConvoyMates to access your location so your group can keep seeing your live position even when you switch to another app during a journey.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow Destiny to access your location to share it with your journey group.</string>
+    <string>Allow ConvoyMates to access your location to share it with your journey group.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>RCTNewArchEnabled</key>

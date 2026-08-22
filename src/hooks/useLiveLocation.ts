@@ -32,7 +32,7 @@ const startBackgroundUpdates = async (journeyId: string, memberId: string, desti
     await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
         ...WATCH_OPTIONS,
         foregroundService: {
-            notificationTitle: 'Destiny is sharing your location',
+            notificationTitle: 'ConvoyMates is sharing your location',
             notificationBody: 'Your group can see your live position for this journey.',
         },
     });

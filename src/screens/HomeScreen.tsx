@@ -305,7 +305,7 @@ export default function HomeScreen({ navigation, route }: any) {
         if (!uid) {
             Alert.alert(
                 'Not signed in yet',
-                "We're still connecting you to Destiny. Please wait a moment and try again."
+                "We're still connecting you to ConvoyMates. Please wait a moment and try again."
             );
             return;
         }

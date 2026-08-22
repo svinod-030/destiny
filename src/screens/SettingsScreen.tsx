@@ -62,7 +62,7 @@ export default function SettingsScreen() {
     };
 
     const handleContactUs = () => {
-        Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=Destiny Support ${APP_CONFIG.APP_VERSION}`);
+        Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=ConvoyMates Support ${APP_CONFIG.APP_VERSION}`);
     };
 
     return (
@@ -145,7 +145,7 @@ export default function SettingsScreen() {
                     />
 
                     <View className="items-center mt-6">
-                        <Text className="text-gray-500 dark:text-gray-400 font-bold text-base">Destiny</Text>
+                        <Text className="text-gray-500 dark:text-gray-400 font-bold text-base">ConvoyMates</Text>
                         <Text className="text-gray-400 dark:text-gray-600 text-sm mt-1">
                             Version {APP_CONFIG.APP_VERSION}
                         </Text>
