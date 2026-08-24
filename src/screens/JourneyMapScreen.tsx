@@ -15,6 +15,7 @@ import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { EditStopsModal } from '../components/EditStopsModal';
 import { RouteList } from '../components/RouteList';
+import { BackgroundLocationDisclosureModal } from '../components/BackgroundLocationDisclosureModal';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification } from '../utils/journeyNotification';
 import { getInitials } from '../utils/color';
@@ -116,19 +117,6 @@ export default function JourneyMapScreen({ navigation }: any) {
             );
         }
     }, [permissionDenied]);
-
-    useEffect(() => {
-        if (!showBackgroundPrompt) return;
-        Alert.alert(
-            'Keep sharing while you multitask?',
-            "Allow ConvoyMates to access your location ‘Always’ so your group can keep seeing your live position even if you switch to another app, like Maps for directions. Otherwise, your location will only update while ConvoyMates is open.",
-            [
-                { text: 'Not Now', style: 'cancel', onPress: dismissBackgroundPrompt },
-                { text: 'Enable', onPress: () => enableBackgroundTracking() },
-            ]
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showBackgroundPrompt]);
 
     const handleRecenter = () => {
         if (!journey) return;
@@ -398,6 +386,12 @@ export default function JourneyMapScreen({ navigation }: any) {
                     initialStops={journey.stops ?? []}
                 />
             )}
+
+            <BackgroundLocationDisclosureModal
+                visible={showBackgroundPrompt}
+                onAllow={() => enableBackgroundTracking()}
+                onDeny={dismissBackgroundPrompt}
+            />
         </SafeAreaView>
     );
 }
