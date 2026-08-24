@@ -15,6 +15,7 @@ import { useThemeColors } from '../utils/theme';
 import { distanceInMeters, sortByDistanceFromPoint } from '../utils/geo';
 import { Destination } from '../types/journey';
 import { StopsDragList } from '../components/StopsDragList';
+import { PermissionDisclosureModal } from '../components/PermissionDisclosureModal';
 
 interface SelectedPoint {
     id: string;
@@ -56,6 +57,7 @@ export default function HomeScreen({ navigation, route }: any) {
     const [isCreating, setIsCreating] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showsUserLocation, setShowsUserLocation] = useState(false);
+    const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
     const { uid, name } = useAuthStore();
     const activeJourneyId = useJourneyStore((state) => state.journeyId);
@@ -130,29 +132,47 @@ export default function HomeScreen({ navigation, route }: any) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [route?.params?.repeatFrom]);
 
+    const useCurrentLocation = async () => {
+        try {
+            setShowsUserLocation(true);
+            const current = await Location.getCurrentPositionAsync({});
+            currentLocationRef.current = { lat: current.coords.latitude, lng: current.coords.longitude };
+            if (selectedPointsRef.current.length > 0) return;
+            mapRef.current?.animateToRegion({
+                latitude: current.coords.latitude,
+                longitude: current.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            });
+        } catch (error) {
+            console.error('Failed to get current location:', error);
+        }
+    };
+
+    const confirmLocationPermission = async () => {
+        setShowLocationDisclosure(false);
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') await useCurrentLocation();
+    };
+
+    // Prominent-disclosure requirement: the permission dialog must be
+    // immediately preceded by an in-app explanation, not fired automatically
+    // on mount - so this only checks the existing status here, and shows the
+    // disclosure modal (which itself triggers the actual request) if needed.
     useEffect(() => {
         (async () => {
             try {
-                let { status } = await Location.getForegroundPermissionsAsync();
-                if (status !== 'granted') {
-                    ({ status } = await Location.requestForegroundPermissionsAsync());
+                const { status } = await Location.getForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    await useCurrentLocation();
+                } else {
+                    setShowLocationDisclosure(true);
                 }
-                if (status !== 'granted') return;
-
-                setShowsUserLocation(true);
-                const current = await Location.getCurrentPositionAsync({});
-                currentLocationRef.current = { lat: current.coords.latitude, lng: current.coords.longitude };
-                if (selectedPointsRef.current.length > 0) return;
-                mapRef.current?.animateToRegion({
-                    latitude: current.coords.latitude,
-                    longitude: current.coords.longitude,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                });
             } catch (error) {
-                console.error('Failed to get current location:', error);
+                console.error('Failed to check location permission:', error);
             }
         })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Keep the map framing every selected point: zoom to the single pin when
@@ -535,6 +555,17 @@ export default function HomeScreen({ navigation, route }: any) {
                     )}
                 </TouchableOpacity>
             </View>
+
+            <PermissionDisclosureModal
+                visible={showLocationDisclosure}
+                icon="location"
+                iconColor="#3b82f6"
+                title="Location Access"
+                message="ConvoyMates uses your location to center the map near you and to share your position with your journey group while you're actively in a journey. This only happens while the app is open, unless you later choose to enable background access."
+                confirmLabel="Allow"
+                onAllow={confirmLocationPermission}
+                onDeny={() => setShowLocationDisclosure(false)}
+            />
         </SafeAreaView>
     );
 }

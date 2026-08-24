@@ -25,6 +25,7 @@ import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useThemeColors } from '../utils/theme';
 import AdBanner from '../components/AdBanner';
+import { PermissionDisclosureModal } from '../components/PermissionDisclosureModal';
 
 export default function JoinJourneyScreen({ navigation }: any) {
     const [codeInput, setCodeInput] = useState('');
@@ -36,17 +37,28 @@ export default function JoinJourneyScreen({ navigation }: any) {
     const colors = useThemeColors();
 
     const [permission, requestPermission] = useCameraPermissions();
+    const [mediaPermission, requestMediaPermission] = ImagePicker.useMediaLibraryPermissions();
     const [scanned, setScanned] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [isReadingImage, setIsReadingImage] = useState(false);
+    const [showCameraDisclosure, setShowCameraDisclosure] = useState(false);
+    const [showPhotosDisclosure, setShowPhotosDisclosure] = useState(false);
 
-    const handleRequestPermission = async () => {
+    // Prominent-disclosure requirement: the OS permission dialog must be
+    // immediately preceded by an in-app explanation - so tapping "Scan QR"
+    // shows the disclosure first (if not already granted), and only the
+    // disclosure's own "Allow" button actually triggers the OS request.
+    const handleRequestPermission = () => {
         if (permission?.granted) {
             setIsScanning(true);
             setScanned(false);
             return;
         }
+        setShowCameraDisclosure(true);
+    };
 
+    const confirmCameraPermission = async () => {
+        setShowCameraDisclosure(false);
         const result = await requestPermission();
         if (result.granted) {
             setIsScanning(true);
@@ -69,14 +81,26 @@ export default function JoinJourneyScreen({ navigation }: any) {
 
     // Lets someone join from a QR code they already have as a photo (e.g. a
     // screenshot sent in chat) instead of needing to point the camera at it live.
-    const handlePickFromGallery = async () => {
-        try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (!permissionResult.granted) {
-                Alert.alert('Photos permission needed', 'Allow ConvoyMates to access your photos to upload a QR code.');
-                return;
-            }
+    const handlePickFromGallery = () => {
+        if (mediaPermission?.granted) {
+            pickFromGallery();
+            return;
+        }
+        setShowPhotosDisclosure(true);
+    };
 
+    const confirmPhotosPermission = async () => {
+        setShowPhotosDisclosure(false);
+        const permissionResult = await requestMediaPermission();
+        if (!permissionResult.granted) {
+            Alert.alert('Photos permission needed', 'Allow ConvoyMates to access your photos to upload a QR code.');
+            return;
+        }
+        pickFromGallery();
+    };
+
+    const pickFromGallery = async () => {
+        try {
             const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'] });
             if (result.canceled || !result.assets?.[0]) return;
 
@@ -277,6 +301,28 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 </View>
                             </Modal>
                         )}
+
+                        <PermissionDisclosureModal
+                            visible={showCameraDisclosure}
+                            icon="camera"
+                            iconColor="#3b82f6"
+                            title="Camera Access"
+                            message="ConvoyMates uses your camera only to scan a journey's QR code so you can join instantly. Nothing is recorded, saved, or sent anywhere."
+                            confirmLabel="Allow"
+                            onAllow={confirmCameraPermission}
+                            onDeny={() => setShowCameraDisclosure(false)}
+                        />
+
+                        <PermissionDisclosureModal
+                            visible={showPhotosDisclosure}
+                            icon="image"
+                            iconColor="#3b82f6"
+                            title="Photos Access"
+                            message="ConvoyMates only reads the one photo you pick, to scan a journey's QR code from it. Nothing else in your library is accessed, saved, or sent anywhere."
+                            confirmLabel="Allow"
+                            onAllow={confirmPhotosPermission}
+                            onDeny={() => setShowPhotosDisclosure(false)}
+                        />
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
