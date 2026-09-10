@@ -1,4 +1,4 @@
-# ConvoyMates — Release Notes
+# RoadTrip — Release Notes
 
 **Journey Creation & Tracking**
 - Start a journey by searching for a destination with live autocomplete or long-pressing the map to drop a pin
@@ -16,7 +16,7 @@
 
 **Sharing**
 - Share your journey's QR code and code together as a single image + message via the native share sheet
-- Shared messages include a Play Store link so new users can download ConvoyMates directly
+- Shared messages include a Play Store link so new users can download RoadTrip directly
 
 **Personalization**
 - Switch between Light, Dark, or System appearance at any time
@@ -24,7 +24,7 @@
 - A 3-step illustrated walkthrough introduces how journeys work on first launch
 
 **Settings & Support**
-- Rate ConvoyMates on the Play Store directly from Settings
+- Rate RoadTrip on the Play Store directly from Settings
 - Contact support with one tap via a pre-filled email
 - In-app prompts notify you automatically when a new version is available
 - Current app version is always visible in Settings

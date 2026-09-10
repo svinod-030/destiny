@@ -113,7 +113,7 @@ export default function JourneyMapScreen({ navigation }: any) {
         if (permissionDenied) {
             Alert.alert(
                 'Location permission needed',
-                'Allow ConvoyMates to access your location so the group can see you on the map.'
+                'Allow RoadTrip to access your location so the group can see you on the map.'
             );
         }
     }, [permissionDenied]);

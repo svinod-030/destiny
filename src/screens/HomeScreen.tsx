@@ -325,7 +325,7 @@ export default function HomeScreen({ navigation, route }: any) {
         if (!uid) {
             Alert.alert(
                 'Not signed in yet',
-                "We're still connecting you to ConvoyMates. Please wait a moment and try again."
+                "We're still connecting you to RoadTrip. Please wait a moment and try again."
             );
             return;
         }
@@ -561,7 +561,7 @@ export default function HomeScreen({ navigation, route }: any) {
                 icon="location"
                 iconColor="#3b82f6"
                 title="Location Access"
-                message="ConvoyMates uses your location to center the map near you and to share your position with your journey group while you're actively in a journey. This only happens while the app is open, unless you later choose to enable background access."
+                message="RoadTrip uses your location to center the map near you and to share your position with your journey group while you're actively in a journey. This only happens while the app is open, unless you later choose to enable background access."
                 confirmLabel="Allow"
                 onAllow={confirmLocationPermission}
                 onDeny={() => setShowLocationDisclosure(false)}

@@ -13,7 +13,7 @@ interface BackgroundLocationDisclosureModalProps {
 // disclosure is discoverable even by someone (or an automated reviewer) who
 // never creates/joins a journey and so never sees this contextual modal.
 export const LOCATION_DISCLOSURE_PARAGRAPHS = [
-    "ConvoyMates collects your device's location — including while the app is closed or not in " +
+    "RoadTrip collects your device's location — including while the app is closed or not in " +
         'use — so your journey group can keep seeing your live position, even when you switch to ' +
         'another app like Maps for directions.',
     "This only happens while you're actively part of a journey, and stops the moment you leave " +

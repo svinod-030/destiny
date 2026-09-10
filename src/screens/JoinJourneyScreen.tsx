@@ -65,7 +65,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
             setScanned(false);
         } else {
             setTimeout(() => {
-                Alert.alert('Camera permission needed', 'Allow ConvoyMates to access your camera to scan journey codes.');
+                Alert.alert('Camera permission needed', 'Allow RoadTrip to access your camera to scan journey codes.');
             }, 300);
         }
     };
@@ -93,7 +93,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
         setShowPhotosDisclosure(false);
         const permissionResult = await requestMediaPermission();
         if (!permissionResult.granted) {
-            Alert.alert('Photos permission needed', 'Allow ConvoyMates to access your photos to upload a QR code.');
+            Alert.alert('Photos permission needed', 'Allow RoadTrip to access your photos to upload a QR code.');
             return;
         }
         pickFromGallery();
@@ -126,7 +126,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
         if (!uid) {
             Alert.alert(
                 'Not signed in yet',
-                "We're still connecting you to ConvoyMates. Please wait a moment and try again."
+                "We're still connecting you to RoadTrip. Please wait a moment and try again."
             );
             return;
         }
@@ -307,7 +307,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             icon="camera"
                             iconColor="#3b82f6"
                             title="Camera Access"
-                            message="ConvoyMates uses your camera only to scan a journey's QR code so you can join instantly. Nothing is recorded, saved, or sent anywhere."
+                            message="RoadTrip uses your camera only to scan a journey's QR code so you can join instantly. Nothing is recorded, saved, or sent anywhere."
                             confirmLabel="Allow"
                             onAllow={confirmCameraPermission}
                             onDeny={() => setShowCameraDisclosure(false)}
@@ -318,7 +318,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             icon="image"
                             iconColor="#3b82f6"
                             title="Photos Access"
-                            message="ConvoyMates only reads the one photo you pick, to scan a journey's QR code from it. Nothing else in your library is accessed, saved, or sent anywhere."
+                            message="RoadTrip only reads the one photo you pick, to scan a journey's QR code from it. Nothing else in your library is accessed, saved, or sent anywhere."
                             confirmLabel="Allow"
                             onAllow={confirmPhotosPermission}
                             onDeny={() => setShowPhotosDisclosure(false)}

@@ -64,7 +64,7 @@ export default function SettingsScreen() {
     };
 
     const handleContactUs = () => {
-        Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=ConvoyMates Support ${APP_CONFIG.APP_VERSION}`);
+        Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=RoadTrip Support ${APP_CONFIG.APP_VERSION}`);
     };
 
     const handlePrivacyPolicy = () => {
@@ -159,13 +159,13 @@ export default function SettingsScreen() {
                     <SettingItem
                         icon="navigate-circle-outline"
                         title="Location Access"
-                        subtitle="How ConvoyMates uses your location"
+                        subtitle="How RoadTrip uses your location"
                         onPress={() => setLocationInfoVisible(true)}
                         color="#10b981"
                     />
 
                     <View className="items-center mt-6">
-                        <Text className="text-gray-500 dark:text-gray-400 font-bold text-base">ConvoyMates</Text>
+                        <Text className="text-gray-500 dark:text-gray-400 font-bold text-base">RoadTrip</Text>
                         <Text className="text-gray-400 dark:text-gray-600 text-sm mt-1">
                             Version {APP_CONFIG.APP_VERSION}
                         </Text>
@@ -192,7 +192,7 @@ export default function SettingsScreen() {
                         </View>
 
                         <Text className="text-gray-600 dark:text-gray-300 text-sm leading-5 mb-3">
-                            ConvoyMates only reads your location while you're actively part of a journey, to share
+                            RoadTrip only reads your location while you're actively part of a journey, to share
                             your position with your group on the live map.
                         </Text>
                         {LOCATION_DISCLOSURE_PARAGRAPHS.map((paragraph) => (
