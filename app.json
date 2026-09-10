@@ -2,7 +2,7 @@
   "expo": {
     "name": "RoadTrip",
     "slug": "roadtrip",
-    "version": "3.1.1",
+    "version": "3.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "com.vinodsigadana.destiny",
-      "versionCode": 15,
+      "versionCode": 16,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
