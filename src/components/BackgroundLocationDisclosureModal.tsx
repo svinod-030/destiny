@@ -32,8 +32,8 @@ export function BackgroundLocationDisclosureModal({ visible, onAllow, onDeny }: 
             <View className="flex-1 bg-black/70 justify-center items-center px-6">
                 <View className="bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-sm">
                     <View className="items-center mb-4">
-                        <View className="bg-blue-600/20 p-4 rounded-full mb-3">
-                            <Ionicons name="location" size={32} color="#3b82f6" />
+                        <View className="bg-ocean-600/20 p-4 rounded-full mb-3">
+                            <Ionicons name="location" size={32} color="#0B74B1" />
                         </View>
                         <Text className="text-gray-900 dark:text-white text-xl font-bold text-center">
                             Background Location Access
@@ -48,7 +48,7 @@ export function BackgroundLocationDisclosureModal({ visible, onAllow, onDeny }: 
                     </Text>
 
                     <TouchableOpacity onPress={() => Linking.openURL(APP_CONFIG.PRIVACY_POLICY_URL)} className="mb-5">
-                        <Text className="text-blue-600 dark:text-blue-400 text-sm font-semibold underline">
+                        <Text className="text-ocean-600 dark:text-ocean-400 text-sm font-semibold underline">
                             Read our full Privacy Policy
                         </Text>
                     </TouchableOpacity>
@@ -64,7 +64,7 @@ export function BackgroundLocationDisclosureModal({ visible, onAllow, onDeny }: 
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={onAllow}
-                            className="flex-1 p-4 rounded-2xl items-center bg-blue-600 active:bg-blue-700"
+                            className="flex-1 p-4 rounded-2xl items-center bg-ocean-600 active:bg-ocean-700"
                         >
                             <Text className="text-white font-bold uppercase tracking-wider text-xs">
                                 Allow

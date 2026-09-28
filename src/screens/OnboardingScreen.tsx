@@ -19,7 +19,7 @@ const PIN_PATH =
 const ORANGE = '#F97316';
 const GREEN = '#10B981';
 const PURPLE = '#8B5CF6';
-const BLUE = '#2563EB';
+const BLUE = '#0B74B1';
 
 function Pin({ x, y, scale, color }: { x: number; y: number; scale: number; color: string }) {
     return (
@@ -33,12 +33,12 @@ function Pin({ x, y, scale, color }: { x: number; y: number; scale: number; colo
 function SearchIllustration() {
     return (
         <Svg width={220} height={220} viewBox="0 0 200 200">
-            <Rect x="10" y="10" width="180" height="180" rx="28" fill="#EFF6FF" />
-            <Line x1="10" y1="72" x2="190" y2="72" stroke="#DBEAFE" strokeWidth="2" />
-            <Line x1="10" y1="134" x2="190" y2="134" stroke="#DBEAFE" strokeWidth="2" />
-            <Line x1="72" y1="10" x2="72" y2="190" stroke="#DBEAFE" strokeWidth="2" />
-            <Line x1="134" y1="10" x2="134" y2="190" stroke="#DBEAFE" strokeWidth="2" />
-            <Circle cx="100" cy="152" r="16" fill="none" stroke="#93C5FD" strokeWidth="3" strokeDasharray="4 5" />
+            <Rect x="10" y="10" width="180" height="180" rx="28" fill="#F2F9FD" />
+            <Line x1="10" y1="72" x2="190" y2="72" stroke="#E0F2FA" strokeWidth="2" />
+            <Line x1="10" y1="134" x2="190" y2="134" stroke="#E0F2FA" strokeWidth="2" />
+            <Line x1="72" y1="10" x2="72" y2="190" stroke="#E0F2FA" strokeWidth="2" />
+            <Line x1="134" y1="10" x2="134" y2="190" stroke="#E0F2FA" strokeWidth="2" />
+            <Circle cx="100" cy="152" r="16" fill="none" stroke="#86CDEE" strokeWidth="3" strokeDasharray="4 5" />
             <Pin x={100} y={110} scale={7.5} color={BLUE} />
             <Circle cx="152" cy="46" r="24" fill={BLUE} />
             <Circle cx="147" cy="41" r="8" fill="none" stroke="#ffffff" strokeWidth="3.5" />
@@ -171,7 +171,7 @@ export default function OnboardingScreen({ onDone }: { onDone: () => void }) {
                 {STEPS.map((_, i) => (
                     <View
                         key={i}
-                        className={`h-2 rounded-full ${i === index ? 'w-6 bg-blue-600' : 'w-2 bg-gray-300 dark:bg-gray-700'
+                        className={`h-2 rounded-full ${i === index ? 'w-6 bg-ocean-600' : 'w-2 bg-gray-300 dark:bg-gray-700'
                             }`}
                     />
                 ))}
@@ -180,7 +180,14 @@ export default function OnboardingScreen({ onDone }: { onDone: () => void }) {
             <View className="px-8 pb-6">
                 <TouchableOpacity
                     onPress={goNext}
-                    className="bg-blue-600 p-5 rounded-2xl items-center active:bg-blue-700"
+                    className="bg-ocean-600 p-5 rounded-2xl items-center active:bg-ocean-700"
+                    style={{
+                        shadowColor: '#000',
+                        shadowOpacity: 0.2,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 3 },
+                        elevation: 4,
+                    }}
                 >
                     <Text className="text-white font-bold uppercase tracking-widest">
                         {index === STEPS.length - 1 ? 'Get Started' : 'Next'}

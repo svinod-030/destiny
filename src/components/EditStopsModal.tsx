@@ -218,7 +218,7 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                                     key={point.id}
                                     coordinate={{ latitude: point.lat, longitude: point.lng }}
                                     title={point.name || (index === 0 ? 'Destination' : `Stop ${index}`)}
-                                    pinColor={index === 0 ? '#3b82f6' : undefined}
+                                    pinColor={index === 0 ? '#0B74B1' : undefined}
                                 >
                                     {index > 0 && (
                                         <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
@@ -255,7 +255,7 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                                             className={`px-4 py-3 flex-row items-center active:bg-gray-100 dark:active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
                                                 }`}
                                         >
-                                            <Ionicons name="location-outline" size={18} color="#3b82f6" />
+                                            <Ionicons name="location-outline" size={18} color="#0B74B1" />
                                             <View className="ml-3 flex-1">
                                                 <Text
                                                     className="text-gray-900 dark:text-white font-semibold"
@@ -287,7 +287,7 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                         <TouchableOpacity
                             onPress={handleSave}
                             disabled={isSaving || points.length === 0}
-                            className={`p-5 rounded-2xl items-center flex-row justify-center ${isSaving || points.length === 0 ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                            className={`p-5 rounded-2xl items-center flex-row justify-center ${isSaving || points.length === 0 ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
                                 }`}
                         >
                             {isSaving ? (

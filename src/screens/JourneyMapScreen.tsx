@@ -198,7 +198,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                 <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4 text-center">{connectionError}</Text>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('HomeTabs')}
-                    className="mt-8 bg-blue-600 px-8 py-4 rounded-2xl active:bg-blue-700"
+                    className="mt-8 bg-ocean-600 px-8 py-4 rounded-2xl active:bg-ocean-700"
                 >
                     <Text className="text-white font-bold uppercase tracking-widest">Back Home</Text>
                 </TouchableOpacity>
@@ -209,7 +209,7 @@ export default function JourneyMapScreen({ navigation }: any) {
     if (!journey) {
         return (
             <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 justify-center items-center">
-                <ActivityIndicator size="large" color="#3b82f6" />
+                <ActivityIndicator size="large" color="#0B74B1" />
                 <Text className="text-gray-500 dark:text-gray-400 mt-4">Connecting to journey…</Text>
             </SafeAreaView>
         );
@@ -280,11 +280,11 @@ export default function JourneyMapScreen({ navigation }: any) {
                         accessibilityHint="Opens your journey code and QR code to share with others"
                         className="flex-row items-center bg-white/90 dark:bg-gray-900/90 pl-3 pr-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-700"
                     >
-                        <Ionicons name="share-social-outline" size={20} color="#3b82f6" />
+                        <Ionicons name="share-social-outline" size={20} color="#0B74B1" />
                         <Text
                             numberOfLines={1}
                             maxFontSizeMultiplier={1.4}
-                            className="text-blue-600 dark:text-blue-400 font-bold ml-1.5 text-sm"
+                            className="text-ocean-600 dark:text-ocean-400 font-bold ml-1.5 text-sm"
                         >
                             Share
                         </Text>
@@ -295,7 +295,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                         accessibilityLabel="Recenter map"
                         className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
                     >
-                        <Ionicons name="locate" size={22} color="#3b82f6" />
+                        <Ionicons name="locate" size={22} color="#0B74B1" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -337,9 +337,9 @@ export default function JourneyMapScreen({ navigation }: any) {
                         className={`flex-1 flex-row items-center justify-center py-2.5 rounded-xl ${activeTab === 'members' ? 'bg-white dark:bg-gray-700' : ''
                             }`}
                     >
-                        <Ionicons name="people" size={16} color={activeTab === 'members' ? '#3b82f6' : colors.textSecondary} />
+                        <Ionicons name="people" size={16} color={activeTab === 'members' ? '#0B74B1' : colors.textSecondary} />
                         <Text
-                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'members' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'members' ? 'text-ocean-600 dark:text-ocean-400' : 'text-gray-500 dark:text-gray-400'
                                 }`}
                         >
                             Members
@@ -350,9 +350,9 @@ export default function JourneyMapScreen({ navigation }: any) {
                         className={`flex-1 flex-row items-center justify-center py-2.5 rounded-xl ${activeTab === 'route' ? 'bg-white dark:bg-gray-700' : ''
                             }`}
                     >
-                        <Ionicons name="map" size={16} color={activeTab === 'route' ? '#3b82f6' : colors.textSecondary} />
+                        <Ionicons name="map" size={16} color={activeTab === 'route' ? '#0B74B1' : colors.textSecondary} />
                         <Text
-                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'route' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                            className={`ml-1.5 font-bold text-xs uppercase tracking-wider ${activeTab === 'route' ? 'text-ocean-600 dark:text-ocean-400' : 'text-gray-500 dark:text-gray-400'
                                 }`}
                         >
                             Route
@@ -377,10 +377,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                             <View className="px-4 pb-2">
                                 <TouchableOpacity
                                     onPress={() => setEditStopsVisible(true)}
-                                    className="flex-row items-center justify-center bg-blue-600/10 border border-blue-600/30 rounded-xl py-2.5"
+                                    className="flex-row items-center justify-center bg-ocean-600/10 border border-ocean-600/30 rounded-xl py-2.5"
                                 >
-                                    <Ionicons name="create-outline" size={16} color="#3b82f6" />
-                                    <Text className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                    <Ionicons name="create-outline" size={16} color="#0B74B1" />
+                                    <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
                                         Edit Route
                                     </Text>
                                 </TouchableOpacity>

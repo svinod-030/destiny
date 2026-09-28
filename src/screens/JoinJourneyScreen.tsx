@@ -159,8 +159,8 @@ export default function JoinJourneyScreen({ navigation }: any) {
                 className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8"
                 edges={['left', 'right']}
             >
-                <View className="bg-blue-600/20 p-6 rounded-full mb-6">
-                    <Ionicons name="navigate" size={60} color="#3b82f6" />
+                <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
+                    <Ionicons name="navigate" size={60} color="#0B74B1" />
                 </View>
                 <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center">
                     Journey in progress
@@ -170,7 +170,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                 </Text>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('JourneyMap')}
-                    className="mt-8 bg-blue-600 px-8 py-5 rounded-2xl flex-row items-center active:bg-blue-700"
+                    className="mt-8 bg-ocean-600 px-8 py-5 rounded-2xl flex-row items-center active:bg-ocean-700"
                 >
                     <Ionicons name="arrow-forward-circle-outline" size={20} color="#fff" />
                     <Text className="text-white font-bold ml-2 uppercase tracking-widest">
@@ -187,8 +187,8 @@ export default function JoinJourneyScreen({ navigation }: any) {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
                         <View className="items-center mt-10 mb-10">
-                            <View className="bg-blue-600/20 p-6 rounded-full mb-6">
-                                <Ionicons name="people" size={60} color="#3b82f6" />
+                            <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
+                                <Ionicons name="people" size={60} color="#0B74B1" />
                             </View>
                             <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center">
                                 Join a Journey
@@ -210,15 +210,22 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 font-bold text-2xl mb-6 tracking-widest"
                                 autoCapitalize="characters"
                                 autoCorrect={false}
-                                selectionColor="#3b82f6"
+                                selectionColor="#0B74B1"
                             />
 
                             <View className="gap-3">
                                 <TouchableOpacity
                                     onPress={() => handleJoin()}
                                     disabled={isLoading || !codeInput.trim()}
-                                    className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                                    className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
                                         }`}
+                                    style={{
+                                        shadowColor: '#000',
+                                        shadowOpacity: 0.2,
+                                        shadowRadius: 8,
+                                        shadowOffset: { width: 0, height: 3 },
+                                        elevation: 4,
+                                    }}
                                 >
                                     {isLoading ? (
                                         <ActivityIndicator color="white" />
@@ -236,8 +243,8 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                     onPress={handleRequestPermission}
                                     className="p-5 rounded-2xl items-center flex-row justify-center border border-dashed border-gray-300 dark:border-gray-600 active:bg-gray-100 dark:active:bg-gray-700"
                                 >
-                                    <Ionicons name="qr-code-outline" size={20} color="#3b82f6" />
-                                    <Text className="text-blue-500 font-bold ml-3 uppercase tracking-widest">
+                                    <Ionicons name="qr-code-outline" size={20} color="#0B74B1" />
+                                    <Text className="text-ocean-500 font-bold ml-3 uppercase tracking-widest">
                                         Scan QR
                                     </Text>
                                 </TouchableOpacity>
@@ -305,7 +312,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                         <PermissionDisclosureModal
                             visible={showCameraDisclosure}
                             icon="camera"
-                            iconColor="#3b82f6"
+                            iconColor="#0B74B1"
                             title="Camera Access"
                             message="RoadTrip uses your camera only to scan a journey's QR code so you can join instantly. Nothing is recorded, saved, or sent anywhere."
                             confirmLabel="Allow"
@@ -316,7 +323,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                         <PermissionDisclosureModal
                             visible={showPhotosDisclosure}
                             icon="image"
-                            iconColor="#3b82f6"
+                            iconColor="#0B74B1"
                             title="Photos Access"
                             message="RoadTrip only reads the one photo you pick, to scan a journey's QR code from it. Nothing else in your library is accessed, saved, or sent anywhere."
                             confirmLabel="Allow"
@@ -337,19 +344,19 @@ const styles = StyleSheet.create({
     scanFrame: { width: 280, height: 280, backgroundColor: 'transparent' },
     cornerTopLeft: {
         position: 'absolute', top: 0, left: 0, width: 40, height: 40,
-        borderTopWidth: 4, borderLeftWidth: 4, borderColor: '#3b82f6', borderTopLeftRadius: 20,
+        borderTopWidth: 4, borderLeftWidth: 4, borderColor: '#0B74B1', borderTopLeftRadius: 20,
     },
     cornerTopRight: {
         position: 'absolute', top: 0, right: 0, width: 40, height: 40,
-        borderTopWidth: 4, borderRightWidth: 4, borderColor: '#3b82f6', borderTopRightRadius: 20,
+        borderTopWidth: 4, borderRightWidth: 4, borderColor: '#0B74B1', borderTopRightRadius: 20,
     },
     cornerBottomLeft: {
         position: 'absolute', bottom: 0, left: 0, width: 40, height: 40,
-        borderBottomWidth: 4, borderLeftWidth: 4, borderColor: '#3b82f6', borderBottomLeftRadius: 20,
+        borderBottomWidth: 4, borderLeftWidth: 4, borderColor: '#0B74B1', borderBottomLeftRadius: 20,
     },
     cornerBottomRight: {
         position: 'absolute', bottom: 0, right: 0, width: 40, height: 40,
-        borderBottomWidth: 4, borderRightWidth: 4, borderColor: '#3b82f6', borderBottomRightRadius: 20,
+        borderBottomWidth: 4, borderRightWidth: 4, borderColor: '#0B74B1', borderBottomRightRadius: 20,
     },
     scanText: {
         color: '#fff', fontSize: 22, fontWeight: '900', marginTop: 60,

@@ -87,6 +87,7 @@ export default function AppNavigator() {
             background: colors.background,
             card: colors.headerBackground,
             border: colors.border,
+            primary: '#0B74B1',
         },
     };
 

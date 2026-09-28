@@ -106,12 +106,12 @@ export function StopsDragList({ stops, onReorder, onRemove, firstIsDestination }
                             shadowOffset: { width: 0, height: 3 },
                         }}
                         className={`flex-row items-center rounded-2xl pl-3 pr-1 border ${isDestination
-                                ? 'bg-blue-600/10 border-blue-600/30'
+                                ? 'bg-ocean-600/10 border-ocean-600/30'
                                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                             }`}
                     >
                         <View
-                            className={`w-7 h-7 rounded-full items-center justify-center ${isDestination ? 'bg-blue-600' : 'bg-orange-500'
+                            className={`w-7 h-7 rounded-full items-center justify-center ${isDestination ? 'bg-ocean-600' : 'bg-orange-500'
                                 }`}
                         >
                             {isDestination ? (

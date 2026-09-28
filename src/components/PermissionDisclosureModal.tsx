@@ -54,7 +54,7 @@ export function PermissionDisclosureModal({
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={onAllow}
-                            className="flex-1 p-4 rounded-2xl items-center bg-blue-600 active:bg-blue-700"
+                            className="flex-1 p-4 rounded-2xl items-center bg-ocean-600 active:bg-ocean-700"
                         >
                             <Text className="text-white font-bold uppercase tracking-wider text-xs">{confirmLabel}</Text>
                         </TouchableOpacity>

@@ -20,7 +20,7 @@ const SettingItem = ({
     title,
     subtitle,
     onPress,
-    color = '#3b82f6',
+    color = '#0B74B1',
 }: {
     icon: keyof typeof Ionicons.glyphMap;
     title: string;
@@ -76,8 +76,8 @@ export default function SettingsScreen() {
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
                 <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 }}>
                     <View className="items-center mb-8">
-                        <View className="bg-blue-600/20 p-6 rounded-full mb-4">
-                            <Ionicons name="person-circle-outline" size={60} color="#3b82f6" />
+                        <View className="bg-ocean-600/20 p-6 rounded-full mb-4">
+                            <Ionicons name="person-circle-outline" size={60} color="#0B74B1" />
                         </View>
                         <Text className="text-gray-900 dark:text-white text-2xl font-bold">Settings</Text>
                     </View>
@@ -92,12 +92,19 @@ export default function SettingsScreen() {
                         placeholderTextColor={colors.placeholder}
                         autoCapitalize="words"
                         className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg mb-6"
-                        selectionColor="#3b82f6"
+                        selectionColor="#0B74B1"
                     />
 
                     <TouchableOpacity
                         onPress={handleSave}
-                        className="bg-blue-600 p-5 rounded-2xl items-center active:bg-blue-700 mb-10"
+                        className="bg-ocean-600 p-5 rounded-2xl items-center active:bg-ocean-700 mb-10"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOpacity: 0.2,
+                            shadowRadius: 8,
+                            shadowOffset: { width: 0, height: 3 },
+                            elevation: 4,
+                        }}
                     >
                         <Text className="text-white font-bold uppercase tracking-widest">Save</Text>
                     </TouchableOpacity>
@@ -113,7 +120,7 @@ export default function SettingsScreen() {
                                     key={option.value}
                                     onPress={() => setPreference(option.value)}
                                     className={`flex-1 items-center py-4 rounded-2xl border ${isActive
-                                            ? 'bg-blue-600 border-blue-600'
+                                            ? 'bg-ocean-600 border-ocean-600'
                                             : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                                         }`}
                                 >
@@ -206,14 +213,14 @@ export default function SettingsScreen() {
                         </Text>
 
                         <TouchableOpacity onPress={handlePrivacyPolicy} className="mb-5">
-                            <Text className="text-blue-600 dark:text-blue-400 text-sm font-semibold underline">
+                            <Text className="text-ocean-600 dark:text-ocean-400 text-sm font-semibold underline">
                                 Read our full Privacy Policy
                             </Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setLocationInfoVisible(false)}
-                            className="p-4 rounded-2xl items-center bg-blue-600 active:bg-blue-700"
+                            className="p-4 rounded-2xl items-center bg-ocean-600 active:bg-ocean-700"
                         >
                             <Text className="text-white font-bold uppercase tracking-wider text-xs">Got It</Text>
                         </TouchableOpacity>

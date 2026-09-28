@@ -89,37 +89,48 @@ export default function JourneyHistoryScreen({ navigation }: any) {
         );
 
         return (
-            <View className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 mb-3 overflow-hidden">
-                <TouchableOpacity
-                    onPress={() => {
-                        if (isActive) {
-                            handlePressActive(item);
-                        } else if (hasRoute) {
-                            setExpandedId(isExpanded ? null : item.id);
-                        }
-                    }}
-                    activeOpacity={isActive || hasRoute ? 0.7 : 1}
-                    disabled={!isActive && !hasRoute}
-                >
-                    {header}
-                </TouchableOpacity>
+            <View
+                className="rounded-2xl mb-3"
+                style={{
+                    shadowColor: '#000',
+                    shadowOpacity: 0.1,
+                    shadowRadius: 6,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 2,
+                }}
+            >
+                <View className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (isActive) {
+                                handlePressActive(item);
+                            } else if (hasRoute) {
+                                setExpandedId(isExpanded ? null : item.id);
+                            }
+                        }}
+                        activeOpacity={isActive || hasRoute ? 0.7 : 1}
+                        disabled={!isActive && !hasRoute}
+                    >
+                        {header}
+                    </TouchableOpacity>
 
-                {isExpanded && item.destination && (
-                    <View className="px-4 pb-4">
-                        <RouteList destination={item.destination} stops={item.stops ?? []} />
-                        {!isActive && (
-                            <TouchableOpacity
-                                onPress={() => handleRepeat(item)}
-                                className="flex-row items-center justify-center bg-blue-600/10 border border-blue-600/30 rounded-xl py-2.5 mt-2"
-                            >
-                                <Ionicons name="repeat" size={16} color="#3b82f6" />
-                                <Text className="text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider ml-1.5">
-                                    Repeat Journey
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                )}
+                    {isExpanded && item.destination && (
+                        <View className="px-4 pb-4">
+                            <RouteList destination={item.destination} stops={item.stops ?? []} />
+                            {!isActive && (
+                                <TouchableOpacity
+                                    onPress={() => handleRepeat(item)}
+                                    className="flex-row items-center justify-center bg-ocean-600/10 border border-ocean-600/30 rounded-xl py-2.5 mt-2"
+                                >
+                                    <Ionicons name="repeat" size={16} color="#0B74B1" />
+                                    <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                        Repeat Journey
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
+                </View>
             </View>
         );
     };

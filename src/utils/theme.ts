@@ -26,7 +26,7 @@ const LIGHT: ThemeColors = {
     headerTint: '#111827',
     tabBarBackground: '#ffffff',
     tabBarBorder: '#e5e7eb',
-    tabActive: '#3b82f6',
+    tabActive: '#0B74B1',
     tabInactive: '#9ca3af',
 };
 
@@ -41,7 +41,7 @@ const DARK: ThemeColors = {
     headerTint: '#ffffff',
     tabBarBackground: '#1f2937',
     tabBarBorder: '#374151',
-    tabActive: '#3b82f6',
+    tabActive: '#1699DA',
     tabInactive: '#9ca3af',
 };
 

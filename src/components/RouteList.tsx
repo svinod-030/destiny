@@ -26,8 +26,8 @@ export function RouteList({ destination, stops }: RouteListProps) {
                     </Text>
                 </View>
             ))}
-            <View className="flex-row items-center bg-blue-600/10 border border-blue-600/30 px-4 py-3 rounded-2xl">
-                <View className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center">
+            <View className="flex-row items-center bg-ocean-600/10 border border-ocean-600/30 px-4 py-3 rounded-2xl">
+                <View className="w-10 h-10 rounded-full bg-ocean-600 items-center justify-center">
                     <Ionicons name="flag" size={18} color="#fff" />
                 </View>
                 <Text className="text-gray-900 dark:text-white font-bold text-base ml-3 flex-1" numberOfLines={1}>

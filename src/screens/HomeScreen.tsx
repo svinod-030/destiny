@@ -377,8 +377,8 @@ export default function HomeScreen({ navigation, route }: any) {
                 className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center px-8"
                 edges={['left', 'right']}
             >
-                <View className="bg-blue-600/20 p-6 rounded-full mb-6">
-                    <Ionicons name="navigate" size={60} color="#3b82f6" />
+                <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
+                    <Ionicons name="navigate" size={60} color="#0B74B1" />
                 </View>
                 <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center">
                     Journey in progress
@@ -388,7 +388,7 @@ export default function HomeScreen({ navigation, route }: any) {
                 </Text>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('JourneyMap')}
-                    className="mt-8 bg-blue-600 px-8 py-5 rounded-2xl flex-row items-center active:bg-blue-700"
+                    className="mt-8 bg-ocean-600 px-8 py-5 rounded-2xl flex-row items-center active:bg-ocean-700"
                 >
                     <Ionicons name="arrow-forward-circle-outline" size={20} color="#fff" />
                     <Text className="text-white font-bold ml-2 uppercase tracking-widest">
@@ -426,7 +426,7 @@ export default function HomeScreen({ navigation, route }: any) {
                         {destinationPoint && (
                             <Marker
                                 coordinate={{ latitude: destinationPoint.lat, longitude: destinationPoint.lng }}
-                                pinColor="#3b82f6"
+                                pinColor="#0B74B1"
                                 title={destinationPoint.name || 'Destination'}
                             />
                         )}
@@ -486,7 +486,7 @@ export default function HomeScreen({ navigation, route }: any) {
                                         className={`px-4 py-3 flex-row items-center active:bg-gray-100 dark:active:bg-gray-700 ${index < suggestions.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''
                                             }`}
                                     >
-                                        <Ionicons name="location-outline" size={18} color="#3b82f6" />
+                                        <Ionicons name="location-outline" size={18} color="#0B74B1" />
                                         <View className="ml-3 flex-1">
                                             <Text className="text-gray-900 dark:text-white font-semibold" numberOfLines={1}>
                                                 {item.primaryText}
@@ -540,8 +540,15 @@ export default function HomeScreen({ navigation, route }: any) {
                 <TouchableOpacity
                     onPress={handleCreate}
                     disabled={selectedPoints.length === 0 || isCreating}
-                    className={`mb-4 p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-blue-600/30' : 'bg-blue-600 active:bg-blue-700'
+                    className={`mb-4 p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
                         }`}
+                    style={{
+                        shadowColor: '#000',
+                        shadowOpacity: 0.2,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 3 },
+                        elevation: 4,
+                    }}
                 >
                     {isCreating ? (
                         <ActivityIndicator color="#fff" />
@@ -559,7 +566,7 @@ export default function HomeScreen({ navigation, route }: any) {
             <PermissionDisclosureModal
                 visible={showLocationDisclosure}
                 icon="location"
-                iconColor="#3b82f6"
+                iconColor="#0B74B1"
                 title="Location Access"
                 message="RoadTrip uses your location to center the map near you and to share your position with your journey group while you're actively in a journey. This only happens while the app is open, unless you later choose to enable background access."
                 confirmLabel="Allow"

@@ -30,8 +30,8 @@ export default function NameEntryScreen() {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View className="flex-1 justify-center px-8">
                         <View className="items-center mb-10">
-                            <View className="bg-blue-600/20 p-6 rounded-full mb-6">
-                                <Ionicons name="compass-outline" size={60} color="#3b82f6" />
+                            <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
+                                <Ionicons name="compass-outline" size={60} color="#0B74B1" />
                             </View>
                             <Text className="text-gray-900 dark:text-white text-3xl font-bold text-center">Welcome to RoadTrip</Text>
                             <Text className="text-gray-500 dark:text-gray-400 text-center mt-3 text-base leading-6">
@@ -47,7 +47,7 @@ export default function NameEntryScreen() {
                             autoFocus
                             autoCapitalize="words"
                             className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg mb-6"
-                            selectionColor="#3b82f6"
+                            selectionColor="#0B74B1"
                             onSubmitEditing={handleContinue}
                             returnKeyType="done"
                         />
@@ -55,8 +55,15 @@ export default function NameEntryScreen() {
                         <TouchableOpacity
                             onPress={handleContinue}
                             disabled={!input.trim()}
-                            className={`p-5 rounded-2xl items-center ${input.trim() ? 'bg-blue-600 active:bg-blue-700' : 'bg-blue-600/30'
+                            className={`p-5 rounded-2xl items-center ${input.trim() ? 'bg-ocean-600 active:bg-ocean-700' : 'bg-ocean-600/30'
                                 }`}
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.2,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 3 },
+                                elevation: 4,
+                            }}
                         >
                             <Text className="text-white font-bold uppercase tracking-widest">Continue</Text>
                         </TouchableOpacity>

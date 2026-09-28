@@ -19,8 +19,8 @@ export default function UpdateModal({ visible, onClose, storeVersion }: UpdateMo
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <View className="flex-1 bg-black/70 justify-center items-center px-6">
                 <View className="bg-white dark:bg-gray-800 w-full max-w-sm rounded-3xl border border-gray-200 dark:border-gray-700 items-center p-8">
-                    <View className="bg-blue-600/20 p-6 rounded-full mb-6">
-                        <Ionicons name="rocket-outline" size={40} color="#3b82f6" />
+                    <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
+                        <Ionicons name="rocket-outline" size={40} color="#0B74B1" />
                     </View>
 
                     <Text className="text-gray-900 dark:text-white text-2xl font-bold text-center mb-2">
@@ -33,7 +33,7 @@ export default function UpdateModal({ visible, onClose, storeVersion }: UpdateMo
 
                     <TouchableOpacity
                         onPress={handleUpdate}
-                        className="bg-blue-600 w-full p-5 rounded-2xl items-center active:bg-blue-700"
+                        className="bg-ocean-600 w-full p-5 rounded-2xl items-center active:bg-ocean-700"
                     >
                         <Text className="text-white font-bold uppercase tracking-widest">Update Now</Text>
                     </TouchableOpacity>

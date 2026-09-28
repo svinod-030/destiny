@@ -86,7 +86,7 @@ export default function App() {
   if (!isReady) {
     return (
       <View className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center">
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#0B74B1" />
       </View>
     );
   }

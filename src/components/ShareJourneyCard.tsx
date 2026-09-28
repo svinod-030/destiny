@@ -38,7 +38,16 @@ export const ShareJourneyCard: React.FC<ShareJourneyCardProps> = ({ journeyId, o
     };
 
     return (
-        <View className="bg-white dark:bg-gray-800 p-6 rounded-3xl items-center border border-gray-200 dark:border-gray-700">
+        <View
+            className="bg-white dark:bg-gray-800 p-6 rounded-3xl items-center border border-gray-200 dark:border-gray-700"
+            style={{
+                shadowColor: '#000',
+                shadowOpacity: 0.25,
+                shadowRadius: 16,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 8,
+            }}
+        >
             {onClose && (
                 <TouchableOpacity
                     onPress={onClose}
@@ -71,7 +80,7 @@ export const ShareJourneyCard: React.FC<ShareJourneyCardProps> = ({ journeyId, o
                 accessibilityRole="button"
                 accessibilityLabel="Share journey invite"
                 accessibilityHint="Opens the share sheet to send your journey code and QR code to others"
-                className="flex-row items-center justify-center bg-blue-600 px-6 py-3 rounded-2xl active:bg-blue-700 mt-6 self-stretch"
+                className="flex-row items-center justify-center bg-ocean-600 px-6 py-3 rounded-2xl active:bg-ocean-700 mt-6 self-stretch"
             >
                 {isSharing ? (
                     <ActivityIndicator color="#fff" size="small" />
