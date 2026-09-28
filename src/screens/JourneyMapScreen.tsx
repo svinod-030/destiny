@@ -272,15 +272,27 @@ export default function JourneyMapScreen({ navigation }: any) {
                         ))}
                 </MapView>
 
-                <View className="absolute top-4 right-4 gap-3">
+                <View className="absolute top-4 right-4 gap-3 items-end">
                     <TouchableOpacity
                         onPress={() => setShareVisible(true)}
-                        className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
+                        accessibilityRole="button"
+                        accessibilityLabel="Share journey invite"
+                        accessibilityHint="Opens your journey code and QR code to share with others"
+                        className="flex-row items-center bg-white/90 dark:bg-gray-900/90 pl-3 pr-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-700"
                     >
-                        <Ionicons name="share-outline" size={22} color="#3b82f6" />
+                        <Ionicons name="share-social-outline" size={20} color="#3b82f6" />
+                        <Text
+                            numberOfLines={1}
+                            maxFontSizeMultiplier={1.4}
+                            className="text-blue-600 dark:text-blue-400 font-bold ml-1.5 text-sm"
+                        >
+                            Share
+                        </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleRecenter}
+                        accessibilityRole="button"
+                        accessibilityLabel="Recenter map"
                         className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
                     >
                         <Ionicons name="locate" size={22} color="#3b82f6" />
@@ -385,10 +397,7 @@ export default function JourneyMapScreen({ navigation }: any) {
 
             <Modal visible={shareVisible} transparent animationType="fade" onRequestClose={() => setShareVisible(false)}>
                 <View className="flex-1 bg-black/70 justify-center items-center px-6">
-                    <ShareJourneyCard journeyId={journey.id} />
-                    <TouchableOpacity onPress={() => setShareVisible(false)} className="mt-6 px-8 py-3">
-                        <Text className="text-gray-400 font-bold uppercase tracking-widest">Close</Text>
-                    </TouchableOpacity>
+                    <ShareJourneyCard journeyId={journey.id} onClose={() => setShareVisible(false)} />
                 </View>
             </Modal>
 
