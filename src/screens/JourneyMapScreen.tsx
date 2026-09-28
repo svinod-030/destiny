@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,6 @@ import { RouteList } from '../components/RouteList';
 import { BackgroundLocationDisclosureModal } from '../components/BackgroundLocationDisclosureModal';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification, showMemberJoinedNotification, showMemberLeftNotification } from '../utils/journeyNotification';
-import { getInitials } from '../utils/color';
 import AdBanner from '../components/AdBanner';
 
 const getFitCoordinates = (journey: Journey) => [
@@ -33,6 +32,8 @@ export default function JourneyMapScreen({ navigation }: any) {
     const mapRef = useRef<MapView>(null);
     const journeyRef = useRef<Journey | null>(null);
     const hasFitToMembers = useRef(false);
+    const markerScales = useRef<Map<string, Animated.Value>>(new Map()).current;
+    const calloutMarkerRefs = useRef<Map<string, any>>(new Map()).current;
 
     const { uid } = useAuthStore();
     const { journeyId, role, clear } = useJourneyStore();
@@ -132,6 +133,29 @@ export default function JourneyMapScreen({ navigation }: any) {
             );
         }
     }, [permissionDenied]);
+
+    const getMarkerScale = (key: string) => {
+        let value = markerScales.get(key);
+        if (!value) {
+            value = new Animated.Value(1);
+            markerScales.set(key, value);
+        }
+        return value;
+    };
+
+    const handleFocusPoint = (key: string) => {
+        const scale = getMarkerScale(key);
+        scale.setValue(1);
+        Animated.sequence([
+            Animated.timing(scale, { toValue: 1.6, duration: 180, useNativeDriver: true }),
+            Animated.spring(scale, { toValue: 1, friction: 3, tension: 120, useNativeDriver: true }),
+        ]).start();
+
+        // Selecting from the list doesn't count as tapping the marker itself,
+        // so the callout (which shows its title) needs to be opened explicitly -
+        // it's a no-op for the destination key, which has no ref registered here.
+        calloutMarkerRefs.get(key)?.showCallout();
+    };
 
     const handleRecenter = () => {
         if (!journey) return;
@@ -239,17 +263,51 @@ export default function JourneyMapScreen({ navigation }: any) {
                     <Marker
                         coordinate={{ latitude: journey.destination.lat, longitude: journey.destination.lng }}
                         title={journey.destination.name}
-                        pinColor="#EF4444"
-                    />
+                    >
+                        <Animated.View style={{ transform: [{ scale: getMarkerScale('destination') }] }}>
+                            <View
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: '#0B74B1',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderWidth: 2,
+                                    borderColor: '#fff',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <Ionicons name="flag" size={18} color="#fff" />
+                            </View>
+                        </Animated.View>
+                    </Marker>
                     {(journey.stops ?? []).map((stop, index) => (
                         <Marker
                             key={`${stop.lat}-${stop.lng}-${index}`}
+                            ref={(ref) => {
+                                if (ref) calloutMarkerRefs.set(`stop-${index}`, ref);
+                            }}
                             coordinate={{ latitude: stop.lat, longitude: stop.lng }}
                             title={stop.name}
                         >
-                            <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
-                                <Text className="text-white font-bold text-xs">{index + 1}</Text>
-                            </View>
+                            <Animated.View style={{ transform: [{ scale: getMarkerScale(`stop-${index}`) }] }}>
+                                <View
+                                    style={{
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: 14,
+                                        backgroundColor: '#f97316',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderWidth: 2,
+                                        borderColor: '#fff',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index + 1}</Text>
+                                </View>
+                            </Animated.View>
                         </Marker>
                     ))}
                     {members
@@ -257,17 +315,35 @@ export default function JourneyMapScreen({ navigation }: any) {
                         .map((m) => (
                             <Marker
                                 key={m.id}
-                                coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
+                                ref={(ref) => {
+                                    if (ref) calloutMarkerRefs.set(m.id, ref);
+                                }}
                                 title={m.name}
+                                coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
                             >
-                                <View
-                                    style={{ backgroundColor: m.color }}
-                                    className="w-12 h-12 rounded-full items-center justify-center border-2 border-white"
+                                <Animated.View
+                                    style={{ transform: [{ scale: getMarkerScale(m.id) }] }}
                                 >
-                                    <Text className="text-white font-bold text-base">
-                                        {getInitials(m.name)}
-                                    </Text>
-                                </View>
+                                    <View
+                                        style={{
+                                            backgroundColor: m.color,
+                                            borderColor: '#fff',
+                                            borderWidth: 1.5,
+                                            borderRadius: 999,
+                                            paddingHorizontal: 10,
+                                            paddingVertical: 5,
+                                            maxWidth: 180,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}
+                                            numberOfLines={1}
+                                            maxFontSizeMultiplier={1.2}
+                                        >
+                                            {m.name.toUpperCase().substring(0, 2)}
+                                        </Text>
+                                    </View>
+                                </Animated.View>
                             </Marker>
                         ))}
                 </MapView>
@@ -368,6 +444,11 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 member={member}
                                 destination={journey.destination}
                                 isSelf={member.id === uid}
+                                onPress={
+                                    member.lat != null && member.lng != null
+                                        ? () => handleFocusPoint(member.id)
+                                        : undefined
+                                }
                             />
                         ))}
                     </ScrollView>
@@ -387,7 +468,11 @@ export default function JourneyMapScreen({ navigation }: any) {
                             </View>
                         )}
                         <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: 16 }}>
-                            <RouteList destination={journey.destination} stops={journey.stops ?? []} />
+                            <RouteList
+                                destination={journey.destination}
+                                stops={journey.stops ?? []}
+                                onSelect={(_point, key) => handleFocusPoint(key)}
+                            />
                         </ScrollView>
                     </View>
                 )}

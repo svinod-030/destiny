@@ -8,8 +8,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    TouchableWithoutFeedback,
-    Keyboard,
     Alert,
     StyleSheet,
     Modal,
@@ -184,8 +182,12 @@ export default function JoinJourneyScreen({ navigation }: any) {
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    className="p-6"
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="on-drag"
+                >
                         <View className="items-center mt-10 mb-10">
                             <View className="bg-ocean-600/20 p-6 rounded-full mb-6">
                                 <Ionicons name="people" size={60} color="#0B74B1" />
@@ -334,8 +336,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             onAllow={confirmPhotosPermission}
                             onDeny={() => setShowPhotosDisclosure(false)}
                         />
-                    </ScrollView>
-                </TouchableWithoutFeedback>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

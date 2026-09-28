@@ -221,8 +221,20 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                                     pinColor={index === 0 ? '#0B74B1' : undefined}
                                 >
                                     {index > 0 && (
-                                        <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
-                                            <Text className="text-white font-bold text-xs">{index}</Text>
+                                        <View
+                                            style={{
+                                                width: 28,
+                                                height: 28,
+                                                borderRadius: 14,
+                                                backgroundColor: '#f97316',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                borderWidth: 2,
+                                                borderColor: '#fff',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index}</Text>
                                         </View>
                                     )}
                                 </Marker>

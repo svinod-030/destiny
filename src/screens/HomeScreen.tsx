@@ -436,8 +436,20 @@ export default function HomeScreen({ navigation, route }: any) {
                                 coordinate={{ latitude: stop.lat, longitude: stop.lng }}
                                 title={stop.name || `Stop ${index + 1}`}
                             >
-                                <View className="w-7 h-7 rounded-full bg-orange-500 items-center justify-center border-2 border-white">
-                                    <Text className="text-white font-bold text-xs">{index + 1}</Text>
+                                <View
+                                    style={{
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: 14,
+                                        backgroundColor: '#f97316',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderWidth: 2,
+                                        borderColor: '#fff',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index + 1}</Text>
                                 </View>
                             </Marker>
                         ))}

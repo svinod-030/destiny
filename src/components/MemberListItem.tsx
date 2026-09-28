@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { JourneyMember, Destination } from '../types/journey';
 import { distanceInMeters, formatDistance, hasArrived } from '../utils/geo';
 import { getInitials } from '../utils/color';
@@ -8,9 +9,10 @@ interface MemberListItemProps {
     member: JourneyMember;
     destination: Destination;
     isSelf: boolean;
+    onPress?: () => void;
 }
 
-export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf }) => {
+export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, onPress }) => {
     const hasLocation = member.lat != null && member.lng != null;
     const distanceMeters = hasLocation
         ? distanceInMeters(member.lat as number, member.lng as number, destination.lat, destination.lng)
@@ -22,8 +24,14 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
         statusLabel = arrived ? 'Arrived' : formatDistance(distanceMeters);
     }
 
+    const Row = onPress ? TouchableOpacity : View;
+
     return (
-        <View className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700">
+        <Row
+            onPress={onPress}
+            activeOpacity={onPress ? 0.7 : undefined}
+            className="flex-row items-center bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700"
+        >
             <View
                 style={{ backgroundColor: member.color }}
                 className="w-10 h-10 rounded-full items-center justify-center mr-3"
@@ -46,6 +54,7 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
                     {statusLabel}
                 </Text>
             </View>
-        </View>
+            {onPress && <Ionicons name="locate-outline" size={18} color="#9ca3af" />}
+        </Row>
     );
 };

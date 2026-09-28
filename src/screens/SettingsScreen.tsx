@@ -74,7 +74,11 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900" edges={['left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-                <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 }}>
+                <ScrollView
+                    contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 }}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="on-drag"
+                >
                     <View className="items-center mb-8">
                         <View className="bg-ocean-600/20 p-6 rounded-full mb-4">
                             <Ionicons name="person-circle-outline" size={60} color="#0B74B1" />
