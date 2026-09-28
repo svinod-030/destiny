@@ -1,11 +1,11 @@
 import "./global.css";
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AppNavigator from './src/navigation/AppNavigator';
 import NameEntryScreen from './src/screens/NameEntryScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import UpdateModal from './src/components/UpdateModal';
+import LaunchLoader, { LAUNCH_MIN_DISPLAY_MS } from './src/components/LaunchLoader';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
 import { useAdConfigStore } from './src/store/useAdConfigStore';
@@ -41,10 +41,16 @@ export default function App() {
 
   const [storeVersion, setStoreVersion] = useState('');
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [minDisplayElapsed, setMinDisplayElapsed] = useState(false);
 
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinDisplayElapsed(true), LAUNCH_MIN_DISPLAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!isReady) return;
@@ -83,12 +89,8 @@ export default function App() {
     return unsubscribe;
   }, [isReady, uid]);
 
-  if (!isReady) {
-    return (
-      <View className="flex-1 bg-gray-50 dark:bg-gray-900 items-center justify-center">
-        <ActivityIndicator size="large" color="#0B74B1" />
-      </View>
-    );
+  if (!isReady || !minDisplayElapsed) {
+    return <LaunchLoader />;
   }
 
   return (
