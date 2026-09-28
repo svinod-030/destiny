@@ -79,3 +79,61 @@ export const showArrivalNotification = async (memberName: string, isSelf: boolea
         console.error('Failed to show arrival notification:', e);
     }
 };
+
+const MEMBER_CHANNEL_ID = 'journey-members';
+
+let memberChannelReady = false;
+
+const ensureMemberChannel = async () => {
+    if (memberChannelReady) return;
+    await Notifications.setNotificationChannelAsync(MEMBER_CHANNEL_ID, {
+        name: 'Group updates',
+        importance: Notifications.AndroidImportance.DEFAULT,
+    });
+    memberChannelReady = true;
+};
+
+// A one-off notification fired on every other device watching the journey the
+// moment a new member appears in it - same independent-detection pattern as
+// showArrivalNotification, diffed against the previous Firestore snapshot.
+export const showMemberJoinedNotification = async (memberName: string) => {
+    try {
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') return;
+
+        await ensureMemberChannel();
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: 'New member joined',
+                body: `${memberName} joined the journey.`,
+                sound: true,
+            },
+            trigger: { channelId: MEMBER_CHANNEL_ID },
+        });
+    } catch (e) {
+        console.error('Failed to show member-joined notification:', e);
+    }
+};
+
+// The mirror image of showMemberJoinedNotification: fired when a member's entry
+// disappears from the journey (they left voluntarily - the creator ending the
+// journey for everyone is a separate "journey ended" event, not this one, since
+// that deletes the whole document rather than removing one member).
+export const showMemberLeftNotification = async (memberName: string) => {
+    try {
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') return;
+
+        await ensureMemberChannel();
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: 'Member left',
+                body: `${memberName} left the journey.`,
+                sound: true,
+            },
+            trigger: { channelId: MEMBER_CHANNEL_ID },
+        });
+    } catch (e) {
+        console.error('Failed to show member-left notification:', e);
+    }
+};

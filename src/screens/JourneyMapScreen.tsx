@@ -17,7 +17,7 @@ import { EditStopsModal } from '../components/EditStopsModal';
 import { RouteList } from '../components/RouteList';
 import { BackgroundLocationDisclosureModal } from '../components/BackgroundLocationDisclosureModal';
 import { useThemeColors } from '../utils/theme';
-import { showArrivalNotification } from '../utils/journeyNotification';
+import { showArrivalNotification, showMemberJoinedNotification, showMemberLeftNotification } from '../utils/journeyNotification';
 import { getInitials } from '../utils/color';
 import AdBanner from '../components/AdBanner';
 
@@ -65,6 +65,21 @@ export default function JourneyMapScreen({ navigation }: any) {
                         const justArrived = member.hasArrived && !previous.members[member.id]?.hasArrived;
                         if (justArrived) {
                             showArrivalNotification(member.name, member.id === uid);
+                        }
+
+                        const justJoined = !previous.members[member.id];
+                        if (justJoined && member.id !== uid) {
+                            showMemberJoinedNotification(member.name);
+                        }
+                    });
+
+                    // The journey creator ending it for everyone deletes the whole
+                    // document (handled below via the not-found callback), not this
+                    // update path - so any member missing here voluntarily left.
+                    Object.values(previous.members).forEach((member) => {
+                        const justLeft = !updated.members[member.id];
+                        if (justLeft && member.id !== uid) {
+                            showMemberLeftNotification(member.name);
                         }
                     });
                 }
