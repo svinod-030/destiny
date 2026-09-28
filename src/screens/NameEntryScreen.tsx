@@ -57,13 +57,17 @@ export default function NameEntryScreen() {
                             disabled={!input.trim()}
                             className={`p-5 rounded-2xl items-center ${input.trim() ? 'bg-ocean-600 active:bg-ocean-700' : 'bg-ocean-600/30'
                                 }`}
-                            style={{
-                                shadowColor: '#000',
-                                shadowOpacity: 0.2,
-                                shadowRadius: 8,
-                                shadowOffset: { width: 0, height: 3 },
-                                elevation: 4,
-                            }}
+                            style={
+                                input.trim()
+                                    ? {
+                                        shadowColor: '#000',
+                                        shadowOpacity: 0.2,
+                                        shadowRadius: 8,
+                                        shadowOffset: { width: 0, height: 3 },
+                                        elevation: 4,
+                                    }
+                                    : undefined
+                            }
                         >
                             <Text className="text-white font-bold uppercase tracking-widest">Continue</Text>
                         </TouchableOpacity>

@@ -219,13 +219,17 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                     disabled={isLoading || !codeInput.trim()}
                                     className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
                                         }`}
-                                    style={{
-                                        shadowColor: '#000',
-                                        shadowOpacity: 0.2,
-                                        shadowRadius: 8,
-                                        shadowOffset: { width: 0, height: 3 },
-                                        elevation: 4,
-                                    }}
+                                    style={
+                                        isLoading || !codeInput.trim()
+                                            ? undefined
+                                            : {
+                                                shadowColor: '#000',
+                                                shadowOpacity: 0.2,
+                                                shadowRadius: 8,
+                                                shadowOffset: { width: 0, height: 3 },
+                                                elevation: 4,
+                                            }
+                                    }
                                 >
                                     {isLoading ? (
                                         <ActivityIndicator color="white" />

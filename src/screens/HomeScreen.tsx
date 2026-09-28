@@ -542,13 +542,17 @@ export default function HomeScreen({ navigation, route }: any) {
                     disabled={selectedPoints.length === 0 || isCreating}
                     className={`mb-4 p-5 rounded-2xl items-center flex-row justify-center ${selectedPoints.length === 0 || isCreating ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
                         }`}
-                    style={{
-                        shadowColor: '#000',
-                        shadowOpacity: 0.2,
-                        shadowRadius: 8,
-                        shadowOffset: { width: 0, height: 3 },
-                        elevation: 4,
-                    }}
+                    style={
+                        selectedPoints.length === 0 || isCreating
+                            ? undefined
+                            : {
+                                shadowColor: '#000',
+                                shadowOpacity: 0.2,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 3 },
+                                elevation: 4,
+                            }
+                    }
                 >
                     {isCreating ? (
                         <ActivityIndicator color="#fff" />
