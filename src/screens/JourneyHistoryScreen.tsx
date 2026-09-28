@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +16,16 @@ export default function JourneyHistoryScreen({ navigation }: any) {
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const colors = useThemeColors();
     const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    // Sort by the date shown on each row (ended date once a journey has ended,
+    // otherwise when it started) - the store's own order can drift from this
+    // since it's really "most recently touched", which reshuffles an entry to
+    // the top just because it ended, even if it started before others still active.
+    const sortedEntries = useMemo(() => {
+        const entryDate = (entry: JourneyHistoryEntry) =>
+            new Date(entry.status === 'ended' && entry.endedAt ? entry.endedAt : entry.startedAt).getTime();
+        return [...entries].sort((a, b) => entryDate(b) - entryDate(a));
+    }, [entries]);
 
     const handlePressActive = async (entry: JourneyHistoryEntry) => {
         if (entry.id === journeyId) {
@@ -141,7 +151,7 @@ export default function JourneyHistoryScreen({ navigation }: any) {
                 <Text className="text-gray-900 dark:text-white text-2xl font-bold">Journeys</Text>
             </View>
 
-            {entries.length === 0 ? (
+            {sortedEntries.length === 0 ? (
                 <View className="flex-1 items-center justify-center px-8">
                     <Ionicons name="time-outline" size={64} color={colors.placeholder} />
                     <Text className="text-gray-500 dark:text-gray-400 text-center mt-4 text-base">
@@ -150,7 +160,7 @@ export default function JourneyHistoryScreen({ navigation }: any) {
                 </View>
             ) : (
                 <FlatList
-                    data={entries}
+                    data={sortedEntries}
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={{ padding: 16 }}
