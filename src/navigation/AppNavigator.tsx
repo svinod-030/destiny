@@ -34,7 +34,7 @@ function HomeTabs() {
     const colors = useThemeColors();
 
     return (
-        <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+        <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
             <View style={{ flex: 1, backgroundColor: colors.tabBarBackground }}>
                 <Tab.Navigator
                     screenOptions={({ route }) => ({
