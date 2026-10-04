@@ -196,7 +196,12 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 console.error('Failed to mark journey history as ended:', error);
                             });
                             clear();
-                            navigation.navigate('HomeTabs');
+                            // navigate('HomeTabs') can push a new instance on top instead of
+                            // popping back to the existing one, since HomeTabs is a nested
+                            // tab navigator - leaving this screen reachable via the header's
+                            // back button even though the journey it shows has just ended.
+                            // popToTop() unconditionally collapses the stack back to the root.
+                            navigation.popToTop();
                         } catch (error) {
                             console.error('Failed to end/leave journey:', error);
                             Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -215,7 +220,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                 <Ionicons name="flag" size={64} color={colors.textSecondary} />
                 <Text className="text-gray-900 dark:text-white text-xl font-bold mt-4 text-center">{connectionError}</Text>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('HomeTabs')}
+                    onPress={() => navigation.popToTop()}
                     className="mt-8 bg-ocean-600 px-8 py-4 rounded-2xl active:bg-ocean-700"
                 >
                     <Text className="text-white font-bold uppercase tracking-widest">Back Home</Text>
