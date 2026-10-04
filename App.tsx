@@ -1,5 +1,6 @@
 import "./global.css";
 import React, { useEffect, useState } from 'react';
+import { Text, TextInput } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AppNavigator from './src/navigation/AppNavigator';
 import NameEntryScreen from './src/screens/NameEntryScreen';
@@ -30,6 +31,16 @@ Notifications.setNotificationHandler({
 // As early as possible, before any Firestore/Functions calls fire, so every
 // request in the app carries an App Check token from the start.
 setupAppCheck();
+
+// Caps system font-scale growth app-wide, before anything renders. Headings,
+// buttons, and the tab bar use fixed-size containers that weren't built to
+// reflow for every possible accessibility text size, and were clipping or
+// overlapping at the larger end of the scale - 1.3x still grows for
+// readability without breaking layout. Must run before any screen mounts,
+// so it lives at module scope rather than inside a component/effect.
+const MAX_FONT_SCALE = 1.3;
+(Text as any).defaultProps = { ...(Text as any).defaultProps, maxFontSizeMultiplier: MAX_FONT_SCALE };
+(TextInput as any).defaultProps = { ...(TextInput as any).defaultProps, maxFontSizeMultiplier: MAX_FONT_SCALE };
 
 export default function App() {
   const isReady = useAuthStore((state) => state.isReady);
