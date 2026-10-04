@@ -200,61 +200,88 @@ export default function JoinJourneyScreen({ navigation }: any) {
                             </Text>
                         </View>
 
-                        <View className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-200 dark:border-gray-700 mb-6">
+                        <View
+                            className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-200 dark:border-gray-700 mb-6"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.08,
+                                shadowRadius: 12,
+                                shadowOffset: { width: 0, height: 4 },
+                                elevation: 2,
+                            }}
+                        >
                             <Text className="text-gray-500 text-[10px] font-bold uppercase mb-4 tracking-[4px] ml-1">
                                 Journey Code
                             </Text>
-                            <TextInput
-                                value={codeInput}
-                                onChangeText={setCodeInput}
-                                placeholder="e.g. AB12CD"
-                                placeholderTextColor={colors.placeholder}
-                                className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 font-bold text-2xl mb-6 tracking-widest"
-                                autoCapitalize="characters"
-                                autoCorrect={false}
-                                selectionColor="#0B74B1"
-                            />
-
-                            <View className="gap-3">
-                                <TouchableOpacity
-                                    onPress={() => handleJoin()}
-                                    disabled={isLoading || !codeInput.trim()}
-                                    className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
-                                        }`}
-                                    style={
-                                        isLoading || !codeInput.trim()
-                                            ? undefined
-                                            : {
-                                                shadowColor: '#000',
-                                                shadowOpacity: 0.2,
-                                                shadowRadius: 8,
-                                                shadowOffset: { width: 0, height: 3 },
-                                                elevation: 4,
-                                            }
-                                    }
-                                >
-                                    {isLoading ? (
-                                        <ActivityIndicator color="white" />
-                                    ) : (
-                                        <>
-                                            <Ionicons name="play" size={20} color="#fff" />
-                                            <Text className="text-white font-bold ml-3 uppercase tracking-widest">
-                                                Join
-                                            </Text>
-                                        </>
-                                    )}
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={handleRequestPermission}
-                                    className="p-5 rounded-2xl items-center flex-row justify-center border border-dashed border-gray-300 dark:border-gray-600 active:bg-gray-100 dark:active:bg-gray-700"
-                                >
-                                    <Ionicons name="qr-code-outline" size={20} color="#0B74B1" />
-                                    <Text className="text-ocean-500 font-bold ml-3 uppercase tracking-widest">
-                                        Scan QR
-                                    </Text>
-                                </TouchableOpacity>
+                            <View className="relative justify-center mb-6">
+                                <TextInput
+                                    value={codeInput}
+                                    onChangeText={setCodeInput}
+                                    placeholder="e.g. AB12CD"
+                                    placeholderTextColor={colors.placeholder}
+                                    className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-5 pr-12 rounded-2xl border border-gray-200 dark:border-gray-700 font-bold text-2xl text-center tracking-widest"
+                                    autoCapitalize="characters"
+                                    autoCorrect={false}
+                                    selectionColor="#0B74B1"
+                                />
+                                {codeInput.length > 0 && (
+                                    <TouchableOpacity
+                                        onPress={() => setCodeInput('')}
+                                        accessibilityRole="button"
+                                        accessibilityLabel="Clear journey code"
+                                        className="absolute right-3 p-2"
+                                    >
+                                        <Ionicons name="close-circle" size={22} color={colors.placeholder} />
+                                    </TouchableOpacity>
+                                )}
                             </View>
+
+                            <TouchableOpacity
+                                onPress={() => handleJoin()}
+                                disabled={isLoading || !codeInput.trim()}
+                                className={`p-5 rounded-2xl items-center flex-row justify-center ${isLoading || !codeInput.trim() ? 'bg-ocean-600/30' : 'bg-ocean-600 active:bg-ocean-700'
+                                    }`}
+                                style={
+                                    isLoading || !codeInput.trim()
+                                        ? undefined
+                                        : {
+                                            shadowColor: '#000',
+                                            shadowOpacity: 0.2,
+                                            shadowRadius: 8,
+                                            shadowOffset: { width: 0, height: 3 },
+                                            elevation: 4,
+                                        }
+                                }
+                            >
+                                {isLoading ? (
+                                    <ActivityIndicator color="white" />
+                                ) : (
+                                    <>
+                                        <Ionicons name="play" size={20} color="#fff" />
+                                        <Text className="text-white font-bold ml-3 uppercase tracking-widest">
+                                            Join
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+
+                            <View className="flex-row items-center my-5">
+                                <View className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                                <Text className="text-gray-400 dark:text-gray-500 text-[11px] font-bold uppercase mx-3 tracking-widest">
+                                    Or
+                                </Text>
+                                <View className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={handleRequestPermission}
+                                className="p-5 rounded-2xl items-center flex-row justify-center border-2 border-ocean-600 active:bg-ocean-600/10"
+                            >
+                                <Ionicons name="qr-code-outline" size={20} color="#0B74B1" />
+                                <Text className="text-ocean-600 dark:text-ocean-400 font-bold ml-3 uppercase tracking-widest">
+                                    Scan QR Code
+                                </Text>
+                            </TouchableOpacity>
 
                             {error && (
                                 <View className="mt-6 bg-red-500/10 p-4 rounded-2xl border border-red-500/20 flex-row items-center justify-center">
@@ -263,8 +290,6 @@ export default function JoinJourneyScreen({ navigation }: any) {
                                 </View>
                             )}
                         </View>
-
-                        <AdBanner />
 
                         {isScanning && (
                             <Modal
@@ -338,6 +363,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                         />
                 </ScrollView>
             </KeyboardAvoidingView>
+            <AdBanner />
         </SafeAreaView>
     );
 }
