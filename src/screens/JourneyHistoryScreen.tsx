@@ -8,6 +8,10 @@ import { journeyService } from '../services/journeyService';
 import { useThemeColors } from '../utils/theme';
 import AdBanner from '../components/AdBanner';
 
+const ACTIVE_COLOR = '#10B981';
+const ENDED_COLOR = '#0B74B1';
+const STOP_COLOR = '#f97316';
+
 export default function JourneyHistoryScreen({ navigation }: any) {
     const entries = useJourneyHistoryStore((state) => state.entries);
     const addHistoryEntry = useJourneyHistoryStore((state) => state.addEntry);
@@ -51,10 +55,52 @@ export default function JourneyHistoryScreen({ navigation }: any) {
         });
     };
 
+    const renderProgressTrack = (item: JourneyHistoryEntry, isActive: boolean) => {
+        const stopCount = item.stops?.length ?? 0;
+        // Start, each stop, then destination. An ended journey has reached all of them;
+        // an active one is only known to have started, so only the first step is lit.
+        const steps = stopCount + 2;
+        const litSteps = isActive ? 1 : steps;
+        const litColor = isActive ? ACTIVE_COLOR : ENDED_COLOR;
+
+        return (
+            <View className="flex-row items-center mt-3">
+                {Array.from({ length: steps }).map((_, index) => {
+                    const lit = index < litSteps;
+                    const isDestination = index === steps - 1;
+                    const isStart = index === 0;
+                    const dotColor = lit ? (isStart || isDestination ? litColor : STOP_COLOR) : undefined;
+                    return (
+                        <React.Fragment key={index}>
+                            {index > 0 && (
+                                <View
+                                    className="flex-1 h-1 rounded-full mx-1"
+                                    style={{ backgroundColor: index < litSteps ? litColor : colors.border }}
+                                />
+                            )}
+                            <View
+                                className="w-4 h-4 rounded-full items-center justify-center"
+                                style={{
+                                    backgroundColor: lit ? dotColor : colors.border,
+                                }}
+                            >
+                                {isDestination ? (
+                                    <Ionicons name="flag" size={9} color={lit ? '#fff' : colors.textSecondary} />
+                                ) : null}
+                            </View>
+                        </React.Fragment>
+                    );
+                })}
+            </View>
+        );
+    };
+
     const renderItem = ({ item }: { item: JourneyHistoryEntry }) => {
         const isActive = item.status === 'active';
+        const isCreator = item.role === 'creator';
         const memberCount = item.members?.length;
         const stopCount = item.stops?.length ?? 0;
+        const accent = isActive ? ACTIVE_COLOR : ENDED_COLOR;
 
         const details = [
             memberCount != null ? `${memberCount} ${memberCount === 1 ? 'member' : 'members'}` : null,
@@ -65,79 +111,102 @@ export default function JourneyHistoryScreen({ navigation }: any) {
 
         return (
             <View
-                className="rounded-2xl mb-3"
+                className="rounded-3xl mb-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden"
                 style={{
                     shadowColor: '#000',
-                    shadowOpacity: 0.1,
-                    shadowRadius: 6,
-                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 3 },
                     elevation: 2,
                 }}
             >
-                <View className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (isActive) {
-                                handlePressActive(item);
-                            } else {
-                                navigation.navigate('JourneyHistoryDetail', { entryId: item.id });
-                            }
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <View className="p-4 flex-row items-center justify-between">
-                            <View className="flex-1">
-                                <Text className="text-gray-900 dark:text-white font-bold text-base">
-                                    {item.destination?.name ?? 'Unknown destination'}
-                                </Text>
-                                <Text className="text-gray-500 text-xs mt-1">
-                                    {isActive
-                                        ? `Started ${new Date(item.startedAt).toLocaleString()}`
-                                        : `Ended ${new Date(item.endedAt as string).toLocaleString()}`}
-                                </Text>
-                                {details !== '' && (
-                                    <Text className="text-gray-400 dark:text-gray-500 text-xs mt-1">{details}</Text>
-                                )}
-                            </View>
-                            <View className="flex-row items-center">
-                                <View className="items-end gap-1">
-                                    {isActive && (
-                                        <View className="flex-row items-center bg-green-600/20 border border-green-600/40 px-2 py-0.5 rounded-full">
-                                            <View className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5" />
-                                            <Text className="text-green-500 text-[10px] font-bold uppercase tracking-widest">
-                                                Active
-                                            </Text>
-                                        </View>
-                                    )}
-                                    <View className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-                                        <Text className="text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase tracking-widest">
-                                            {item.role}
-                                        </Text>
-                                    </View>
-                                </View>
+                <View style={{ height: 4, backgroundColor: accent }} />
+                <TouchableOpacity
+                    onPress={() => {
+                        if (isActive) {
+                            handlePressActive(item);
+                        } else {
+                            navigation.navigate('JourneyHistoryDetail', { entryId: item.id });
+                        }
+                    }}
+                    activeOpacity={0.7}
+                    className="p-4"
+                >
+                    <View className="flex-row items-start">
+                        <View
+                            className="w-11 h-11 rounded-2xl items-center justify-center mr-3"
+                            style={{ backgroundColor: `${accent}22` }}
+                        >
+                            <Ionicons
+                                name={isActive ? 'navigate' : 'checkmark-done-circle'}
+                                size={22}
+                                color={accent}
+                            />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-gray-900 dark:text-white font-bold text-base" numberOfLines={1}>
+                                {item.destination?.name ?? 'Unknown destination'}
+                            </Text>
+                            <Text className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+                                {isActive
+                                    ? `Started ${new Date(item.startedAt).toLocaleString()}`
+                                    : `Ended ${new Date(item.endedAt as string).toLocaleString()}`}
+                            </Text>
+                            {details !== '' && (
+                                <Text className="text-gray-400 dark:text-gray-500 text-xs mt-1">{details}</Text>
+                            )}
+                        </View>
+                        <View className="items-end gap-1.5 ml-2">
+                            <View
+                                className="flex-row items-center px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: `${accent}22` }}
+                            >
                                 <Ionicons
-                                    name={isActive ? 'play-circle-outline' : 'chevron-forward'}
-                                    size={18}
-                                    color={colors.textSecondary}
-                                    style={{ marginLeft: 8 }}
+                                    name={isActive ? 'pulse' : 'flag'}
+                                    size={10}
+                                    color={accent}
                                 />
+                                <Text
+                                    className="text-[10px] font-bold uppercase tracking-widest ml-1"
+                                    style={{ color: accent }}
+                                >
+                                    {isActive ? 'In progress' : 'Ended'}
+                                </Text>
+                            </View>
+                            <View
+                                className="flex-row items-center px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: isCreator ? '#f59e0b22' : '#8B5CF622' }}
+                            >
+                                <Ionicons
+                                    name={isCreator ? 'ribbon' : 'person'}
+                                    size={10}
+                                    color={isCreator ? '#f59e0b' : '#8B5CF6'}
+                                />
+                                <Text
+                                    className="text-[10px] font-bold uppercase tracking-widest ml-1"
+                                    style={{ color: isCreator ? '#f59e0b' : '#8B5CF6' }}
+                                >
+                                    {item.role}
+                                </Text>
                             </View>
                         </View>
+                    </View>
+                    {renderProgressTrack(item, isActive)}
+                </TouchableOpacity>
+
+                {!isActive && (
+                    <TouchableOpacity
+                        onPress={() => handleRepeat(item)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Repeat journey to ${item.destination?.name ?? 'destination'}`}
+                        className="flex-row items-center justify-center border-t border-gray-200 dark:border-gray-700 py-3 active:bg-ocean-600/10"
+                    >
+                        <Ionicons name="repeat" size={16} color={ENDED_COLOR} />
+                        <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                            Repeat Journey
+                        </Text>
                     </TouchableOpacity>
-                    {!isActive && (
-                        <TouchableOpacity
-                            onPress={() => handleRepeat(item)}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Repeat journey to ${item.destination?.name ?? 'destination'}`}
-                            className="flex-row items-center justify-center border-t border-gray-200 dark:border-gray-700 py-3 active:bg-ocean-600/10"
-                        >
-                            <Ionicons name="repeat" size={16} color="#0B74B1" />
-                            <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
-                                Repeat Journey
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+                )}
             </View>
         );
     };
@@ -150,8 +219,10 @@ export default function JourneyHistoryScreen({ navigation }: any) {
 
             {sortedEntries.length === 0 ? (
                 <View className="flex-1 items-center justify-center px-8">
-                    <Ionicons name="time-outline" size={64} color={colors.placeholder} />
-                    <Text className="text-gray-500 dark:text-gray-400 text-center mt-4 text-base">
+                    <View className="bg-ocean-600/15 p-6 rounded-full mb-4">
+                        <Ionicons name="time-outline" size={56} color={ENDED_COLOR} />
+                    </View>
+                    <Text className="text-gray-500 dark:text-gray-400 text-center mt-2 text-base">
                         Journeys you create or join will show up here.
                     </Text>
                 </View>
