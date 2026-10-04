@@ -54,20 +54,21 @@ export default function JourneyMapScreen({ navigation }: any) {
         destination: journey ? { lat: journey.destination.lat, lng: journey.destination.lng } : null,
     });
 
-    const syncHistoryMembers = (updated: Journey) => {
+    const syncHistory = (updated: Journey) => {
         if (!uid) return;
         const members = toHistoryMembers(updated.members);
+        const stops = updated.stops ?? [];
         addHistoryEntry({
             id: updated.id,
             destination: updated.destination,
-            stops: updated.stops ?? [],
+            stops,
             role: role || 'member',
             status: 'active',
             startedAt: updated.createdAt,
             members,
         });
-        journeyHistoryService.updateMembers(uid, updated.id, members).catch((error) => {
-            console.error('Failed to sync journey history members:', error);
+        journeyHistoryService.updateLiveFields(uid, updated.id, { members, stops }).catch((error) => {
+            console.error('Failed to sync journey history:', error);
         });
     };
 
@@ -104,8 +105,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                 const membersChanged =
                     !!previous &&
                     Object.keys(previous.members).sort().join() !== Object.keys(updated.members).sort().join();
-                if (membersChanged) {
-                    syncHistoryMembers(updated);
+                const stopsChanged =
+                    !!previous && JSON.stringify(previous.stops ?? []) !== JSON.stringify(updated.stops ?? []);
+                if (membersChanged || stopsChanged) {
+                    syncHistory(updated);
                 }
                 journeyRef.current = updated;
                 setJourney(updated);

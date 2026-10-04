@@ -1,6 +1,7 @@
 import { doc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import { HistoryMember, JourneyHistoryEntry } from '../store/useJourneyHistoryStore';
+import { Destination } from '../types/journey';
 
 const MAX_SYNCED_ENTRIES = 50;
 
@@ -18,10 +19,15 @@ export const journeyHistoryService = {
     },
 
     /**
-     * Replaces the member snapshot on a recorded entry, e.g. when someone joins or leaves.
+     * Refreshes the live-tracked parts of a recorded entry (members, and stops
+     * when the route is edited) so history reflects the journey as it changed.
      */
-    updateMembers: async (uid: string, journeyId: string, members: HistoryMember[]): Promise<void> => {
-        await updateDoc(entryRef(uid, journeyId), { members });
+    updateLiveFields: async (
+        uid: string,
+        journeyId: string,
+        fields: { members: HistoryMember[]; stops: Destination[] }
+    ): Promise<void> => {
+        await updateDoc(entryRef(uid, journeyId), fields);
     },
 
     /**
