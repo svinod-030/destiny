@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useJourneyHistoryStore, JourneyHistoryEntry } from '../store/useJourneyHistoryStore';
 import { useJourneyStore } from '../store/useJourneyStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { journeyHistoryService } from '../services/journeyHistoryService';
 import { journeyService } from '../services/journeyService';
 import { useThemeColors } from '../utils/theme';
 import AdBanner from '../components/AdBanner';
@@ -46,6 +48,31 @@ export default function JourneyHistoryScreen({ navigation }: any) {
 
         setActiveJourney(entry.id, entry.role);
         navigation.navigate('JourneyMap');
+    };
+
+    const removeEntry = useJourneyHistoryStore((state) => state.removeEntry);
+    const uid = useAuthStore((state) => state.uid);
+
+    const handleDelete = (entry: JourneyHistoryEntry) => {
+        Alert.alert(
+            'Delete journey?',
+            'This removes it from your history. The other members keep their own copies.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        removeEntry(entry.id);
+                        if (uid) {
+                            journeyHistoryService.deleteEntry(uid, entry.id).catch((error) => {
+                                console.error('Failed to delete journey history entry:', error);
+                            });
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     const handleRepeat = (entry: JourneyHistoryEntry) => {
@@ -195,17 +222,31 @@ export default function JourneyHistoryScreen({ navigation }: any) {
                 </TouchableOpacity>
 
                 {!isActive && (
-                    <TouchableOpacity
-                        onPress={() => handleRepeat(item)}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Repeat journey to ${item.destination?.name ?? 'destination'}`}
-                        className="flex-row items-center justify-center border-t border-gray-200 dark:border-gray-700 py-3 active:bg-ocean-600/10"
-                    >
-                        <Ionicons name="repeat" size={16} color={ENDED_COLOR} />
-                        <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
-                            Repeat Journey
-                        </Text>
-                    </TouchableOpacity>
+                    <View className="flex-row border-t border-gray-200 dark:border-gray-700">
+                        <TouchableOpacity
+                            onPress={() => handleRepeat(item)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Repeat journey to ${item.destination?.name ?? 'destination'}`}
+                            className="flex-1 flex-row items-center justify-center py-3 active:bg-ocean-600/10"
+                        >
+                            <Ionicons name="repeat" size={16} color={ENDED_COLOR} />
+                            <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                Repeat
+                            </Text>
+                        </TouchableOpacity>
+                        <View className="w-px bg-gray-200 dark:bg-gray-700" />
+                        <TouchableOpacity
+                            onPress={() => handleDelete(item)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Delete journey to ${item.destination?.name ?? 'destination'}`}
+                            className="flex-1 flex-row items-center justify-center py-3 active:bg-red-600/10"
+                        >
+                            <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                            <Text className="text-red-500 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                Delete
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
         );
