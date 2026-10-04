@@ -13,6 +13,7 @@ import JoinJourneyScreen from '../screens/JoinJourneyScreen';
 import JourneyHistoryScreen from '../screens/JourneyHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import JourneyMapScreen from '../screens/JourneyMapScreen';
+import JourneyHistoryDetailScreen from '../screens/JourneyHistoryDetailScreen';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useThemeColors } from '../utils/theme';
 
@@ -110,6 +111,11 @@ export default function AppNavigator() {
             <NavigationContainer theme={navigationTheme} initialState={initialState}>
                 <Stack.Navigator screenOptions={stackOptions} initialRouteName="HomeTabs">
                     <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ title: '' }} />
+                    <Stack.Screen
+                        name="JourneyHistoryDetail"
+                        component={JourneyHistoryDetailScreen}
+                        options={{ title: 'Journey' }}
+                    />
                     <Stack.Screen
                         name="JourneyMap"
                         component={JourneyMapScreen}

@@ -16,6 +16,7 @@ import { distanceInMeters, sortByDistanceFromPoint } from '../utils/geo';
 import { Destination } from '../types/journey';
 import { StopsDragList } from '../components/StopsDragList';
 import { PermissionDisclosureModal } from '../components/PermissionDisclosureModal';
+import { colorForId } from '../utils/color';
 
 interface SelectedPoint {
     id: string;
@@ -352,6 +353,7 @@ export default function HomeScreen({ navigation, route }: any) {
                 role: 'creator' as const,
                 status: 'active' as const,
                 startedAt: new Date().toISOString(),
+                members: [{ id: uid, name, color: colorForId(uid), isCreator: true }],
             };
             addHistoryEntry(historyEntry);
             journeyHistoryService.recordEntry(uid, historyEntry).catch((error) => {

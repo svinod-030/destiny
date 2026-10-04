@@ -18,6 +18,7 @@ import { RouteList } from '../components/RouteList';
 import { BackgroundLocationDisclosureModal } from '../components/BackgroundLocationDisclosureModal';
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification, showMemberJoinedNotification, showMemberLeftNotification } from '../utils/journeyNotification';
+import { toHistoryMembers } from '../utils/historyMembers';
 import AdBanner from '../components/AdBanner';
 
 const getFitCoordinates = (journey: Journey) => [
@@ -53,6 +54,23 @@ export default function JourneyMapScreen({ navigation }: any) {
         destination: journey ? { lat: journey.destination.lat, lng: journey.destination.lng } : null,
     });
 
+    const syncHistoryMembers = (updated: Journey) => {
+        if (!uid) return;
+        const members = toHistoryMembers(updated.members);
+        addHistoryEntry({
+            id: updated.id,
+            destination: updated.destination,
+            stops: updated.stops ?? [],
+            role: role || 'member',
+            status: 'active',
+            startedAt: updated.createdAt,
+            members,
+        });
+        journeyHistoryService.updateMembers(uid, updated.id, members).catch((error) => {
+            console.error('Failed to sync journey history members:', error);
+        });
+    };
+
     useEffect(() => {
         if (!journeyId) return;
 
@@ -83,6 +101,12 @@ export default function JourneyMapScreen({ navigation }: any) {
                         }
                     });
                 }
+                const membersChanged =
+                    !!previous &&
+                    Object.keys(previous.members).sort().join() !== Object.keys(updated.members).sort().join();
+                if (membersChanged) {
+                    syncHistoryMembers(updated);
+                }
                 journeyRef.current = updated;
                 setJourney(updated);
             },
@@ -97,6 +121,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                         status: 'ended',
                         startedAt: ended.createdAt,
                         endedAt: new Date().toISOString(),
+                        members: toHistoryMembers(ended.members),
                     });
                     if (uid) {
                         journeyHistoryService.markEnded(uid, ended.id).catch((error) => {
@@ -191,6 +216,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 status: 'ended',
                                 startedAt: journey.createdAt,
                                 endedAt: new Date().toISOString(),
+                                members: toHistoryMembers(journey.members),
                             });
                             journeyHistoryService.markEnded(uid, journey.id).catch((error) => {
                                 console.error('Failed to mark journey history as ended:', error);

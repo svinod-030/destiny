@@ -1,6 +1,6 @@
-import { doc, setDoc, updateDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../utils/firebase';
-import { JourneyHistoryEntry } from '../store/useJourneyHistoryStore';
+import { HistoryMember, JourneyHistoryEntry } from '../store/useJourneyHistoryStore';
 
 const MAX_SYNCED_ENTRIES = 50;
 
@@ -15,6 +15,20 @@ export const journeyHistoryService = {
      */
     recordEntry: async (uid: string, entry: JourneyHistoryEntry): Promise<void> => {
         await setDoc(entryRef(uid, entry.id), entry);
+    },
+
+    /**
+     * Replaces the member snapshot on a recorded entry, e.g. when someone joins or leaves.
+     */
+    updateMembers: async (uid: string, journeyId: string, members: HistoryMember[]): Promise<void> => {
+        await updateDoc(entryRef(uid, journeyId), { members });
+    },
+
+    /**
+     * Removes this user's record of a journey. Doesn't touch the shared live journey.
+     */
+    deleteEntry: async (uid: string, journeyId: string): Promise<void> => {
+        await deleteDoc(entryRef(uid, journeyId));
     },
 
     /**

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,6 @@ import { useJourneyHistoryStore, JourneyHistoryEntry } from '../store/useJourney
 import { useJourneyStore } from '../store/useJourneyStore';
 import { journeyService } from '../services/journeyService';
 import { useThemeColors } from '../utils/theme';
-import { RouteList } from '../components/RouteList';
 import AdBanner from '../components/AdBanner';
 
 export default function JourneyHistoryScreen({ navigation }: any) {
@@ -15,7 +14,6 @@ export default function JourneyHistoryScreen({ navigation }: any) {
     const journeyId = useJourneyStore((state) => state.journeyId);
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
     const colors = useThemeColors();
-    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     // Sort by the date shown on each row (ended date once a journey has ended,
     // otherwise when it started) - the store's own order can drift from this
@@ -55,48 +53,15 @@ export default function JourneyHistoryScreen({ navigation }: any) {
 
     const renderItem = ({ item }: { item: JourneyHistoryEntry }) => {
         const isActive = item.status === 'active';
-        const hasRoute = !!item.destination;
-        const isExpanded = expandedId === item.id;
+        const memberCount = item.members?.length;
+        const stopCount = item.stops?.length ?? 0;
 
-        const header = (
-            <View className="p-4 flex-row items-center justify-between">
-                <View className="flex-1">
-                    <Text className="text-gray-900 dark:text-white font-bold text-base">
-                        {item.destination?.name ?? 'Unknown destination'}
-                    </Text>
-                    <Text className="text-gray-500 text-xs mt-1">
-                        {isActive
-                            ? `Started ${new Date(item.startedAt).toLocaleString()}`
-                            : `Ended ${new Date(item.endedAt as string).toLocaleString()}`}
-                    </Text>
-                </View>
-                <View className="flex-row items-center">
-                    <View className="items-end gap-1">
-                        {isActive && (
-                            <View className="flex-row items-center bg-green-600/20 border border-green-600/40 px-2 py-0.5 rounded-full">
-                                <View className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5" />
-                                <Text className="text-green-500 text-[10px] font-bold uppercase tracking-widest">
-                                    Active
-                                </Text>
-                            </View>
-                        )}
-                        <View className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-                            <Text className="text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase tracking-widest">
-                                {item.role}
-                            </Text>
-                        </View>
-                    </View>
-                    {hasRoute && (
-                        <Ionicons
-                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={18}
-                            color={colors.textSecondary}
-                            style={{ marginLeft: 8 }}
-                        />
-                    )}
-                </View>
-            </View>
-        );
+        const details = [
+            memberCount != null ? `${memberCount} ${memberCount === 1 ? 'member' : 'members'}` : null,
+            stopCount > 0 ? `${stopCount} ${stopCount === 1 ? 'stop' : 'stops'}` : null,
+        ]
+            .filter(Boolean)
+            .join(' · ');
 
         return (
             <View
@@ -114,31 +79,63 @@ export default function JourneyHistoryScreen({ navigation }: any) {
                         onPress={() => {
                             if (isActive) {
                                 handlePressActive(item);
-                            } else if (hasRoute) {
-                                setExpandedId(isExpanded ? null : item.id);
+                            } else {
+                                navigation.navigate('JourneyHistoryDetail', { entryId: item.id });
                             }
                         }}
-                        activeOpacity={isActive || hasRoute ? 0.7 : 1}
-                        disabled={!isActive && !hasRoute}
+                        activeOpacity={0.7}
                     >
-                        {header}
-                    </TouchableOpacity>
-
-                    {isExpanded && item.destination && (
-                        <View className="px-4 pb-4">
-                            <RouteList destination={item.destination} stops={item.stops ?? []} />
-                            {!isActive && (
-                                <TouchableOpacity
-                                    onPress={() => handleRepeat(item)}
-                                    className="flex-row items-center justify-center bg-ocean-600/10 border border-ocean-600/30 rounded-xl py-2.5 mt-2"
-                                >
-                                    <Ionicons name="repeat" size={16} color="#0B74B1" />
-                                    <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
-                                        Repeat Journey
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
+                        <View className="p-4 flex-row items-center justify-between">
+                            <View className="flex-1">
+                                <Text className="text-gray-900 dark:text-white font-bold text-base">
+                                    {item.destination?.name ?? 'Unknown destination'}
+                                </Text>
+                                <Text className="text-gray-500 text-xs mt-1">
+                                    {isActive
+                                        ? `Started ${new Date(item.startedAt).toLocaleString()}`
+                                        : `Ended ${new Date(item.endedAt as string).toLocaleString()}`}
+                                </Text>
+                                {details !== '' && (
+                                    <Text className="text-gray-400 dark:text-gray-500 text-xs mt-1">{details}</Text>
+                                )}
+                            </View>
+                            <View className="flex-row items-center">
+                                <View className="items-end gap-1">
+                                    {isActive && (
+                                        <View className="flex-row items-center bg-green-600/20 border border-green-600/40 px-2 py-0.5 rounded-full">
+                                            <View className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5" />
+                                            <Text className="text-green-500 text-[10px] font-bold uppercase tracking-widest">
+                                                Active
+                                            </Text>
+                                        </View>
+                                    )}
+                                    <View className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+                                        <Text className="text-gray-600 dark:text-gray-300 text-[10px] font-bold uppercase tracking-widest">
+                                            {item.role}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <Ionicons
+                                    name={isActive ? 'play-circle-outline' : 'chevron-forward'}
+                                    size={18}
+                                    color={colors.textSecondary}
+                                    style={{ marginLeft: 8 }}
+                                />
+                            </View>
                         </View>
+                    </TouchableOpacity>
+                    {!isActive && (
+                        <TouchableOpacity
+                            onPress={() => handleRepeat(item)}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Repeat journey to ${item.destination?.name ?? 'destination'}`}
+                            className="flex-row items-center justify-center border-t border-gray-200 dark:border-gray-700 py-3 active:bg-ocean-600/10"
+                        >
+                            <Ionicons name="repeat" size={16} color="#0B74B1" />
+                            <Text className="text-ocean-600 dark:text-ocean-400 font-bold text-xs uppercase tracking-wider ml-1.5">
+                                Repeat Journey
+                            </Text>
+                        </TouchableOpacity>
                     )}
                 </View>
             </View>

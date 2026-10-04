@@ -22,6 +22,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useThemeColors } from '../utils/theme';
+import { toHistoryMembers } from '../utils/historyMembers';
 import AdBanner from '../components/AdBanner';
 import { PermissionDisclosureModal } from '../components/PermissionDisclosureModal';
 
@@ -139,6 +140,7 @@ export default function JoinJourneyScreen({ navigation }: any) {
                 role: 'member' as const,
                 status: 'active' as const,
                 startedAt: journey.createdAt,
+                members: toHistoryMembers(journey.members),
             };
             addHistoryEntry(historyEntry);
             journeyHistoryService.recordEntry(uid, historyEntry).catch((error) => {
