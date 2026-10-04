@@ -449,7 +449,9 @@ export default function HomeScreen({ navigation, route }: any) {
                                         overflow: 'hidden',
                                     }}
                                 >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index + 1}</Text>
+                                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }} allowFontScaling={false}>
+                                        {index + 1}
+                                    </Text>
                                 </View>
                             </Marker>
                         ))}

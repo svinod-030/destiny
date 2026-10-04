@@ -234,7 +234,9 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                                                 overflow: 'hidden',
                                             }}
                                         >
-                                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index}</Text>
+                                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }} allowFontScaling={false}>
+                                                {index}
+                                            </Text>
                                         </View>
                                     )}
                                 </Marker>

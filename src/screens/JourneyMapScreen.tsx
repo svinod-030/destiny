@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,7 +32,6 @@ export default function JourneyMapScreen({ navigation }: any) {
     const mapRef = useRef<MapView>(null);
     const journeyRef = useRef<Journey | null>(null);
     const hasFitToMembers = useRef(false);
-    const markerScales = useRef<Map<string, Animated.Value>>(new Map()).current;
     const calloutMarkerRefs = useRef<Map<string, any>>(new Map()).current;
 
     const { uid } = useAuthStore();
@@ -134,26 +133,21 @@ export default function JourneyMapScreen({ navigation }: any) {
         }
     }, [permissionDenied]);
 
-    const getMarkerScale = (key: string) => {
-        let value = markerScales.get(key);
-        if (!value) {
-            value = new Animated.Value(1);
-            markerScales.set(key, value);
-        }
-        return value;
-    };
-
-    const handleFocusPoint = (key: string) => {
-        const scale = getMarkerScale(key);
-        scale.setValue(1);
-        Animated.sequence([
-            Animated.timing(scale, { toValue: 1.6, duration: 180, useNativeDriver: true }),
-            Animated.spring(scale, { toValue: 1, friction: 3, tension: 120, useNativeDriver: true }),
-        ]).start();
+    const handleFocusPoint = (point: { lat: number; lng: number }, key: string) => {
+        // Pan (not zoom) so the point is on-screen without disturbing the
+        // user's current zoom level.
+        mapRef.current?.animateCamera(
+            { center: { latitude: point.lat, longitude: point.lng } },
+            { duration: 400 }
+        );
 
         // Selecting from the list doesn't count as tapping the marker itself,
-        // so the callout (which shows its title) needs to be opened explicitly -
-        // it's a no-op for the destination key, which has no ref registered here.
+        // so the callout (which shows its title) needs to be opened explicitly.
+        // (A scale-pulse used to highlight the marker too, but react-native-maps
+        // renders custom marker content as a static bitmap snapshot, and animating
+        // a transform on it forces a re-snapshot mid-animation that rendered as
+        // inconsistent clipped/partial circles across devices - the callout alone
+        // is a reliable, native way to draw attention to the right marker.)
         calloutMarkerRefs.get(key)?.showCallout();
     };
 
@@ -261,26 +255,27 @@ export default function JourneyMapScreen({ navigation }: any) {
                     }}
                 >
                     <Marker
+                        ref={(ref) => {
+                            if (ref) calloutMarkerRefs.set('destination', ref);
+                        }}
                         coordinate={{ latitude: journey.destination.lat, longitude: journey.destination.lng }}
                         title={journey.destination.name}
                     >
-                        <Animated.View style={{ transform: [{ scale: getMarkerScale('destination') }] }}>
-                            <View
-                                style={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 20,
-                                    backgroundColor: '#0B74B1',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderWidth: 2,
-                                    borderColor: '#fff',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <Ionicons name="flag" size={18} color="#fff" />
-                            </View>
-                        </Animated.View>
+                        <View
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: '#0B74B1',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderWidth: 2,
+                                borderColor: '#fff',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Ionicons name="flag" size={18} color="#fff" allowFontScaling={false} />
+                        </View>
                     </Marker>
                     {(journey.stops ?? []).map((stop, index) => (
                         <Marker
@@ -291,23 +286,23 @@ export default function JourneyMapScreen({ navigation }: any) {
                             coordinate={{ latitude: stop.lat, longitude: stop.lng }}
                             title={stop.name}
                         >
-                            <Animated.View style={{ transform: [{ scale: getMarkerScale(`stop-${index}`) }] }}>
-                                <View
-                                    style={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: 14,
-                                        backgroundColor: '#f97316',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        borderWidth: 2,
-                                        borderColor: '#fff',
-                                        overflow: 'hidden',
-                                    }}
-                                >
-                                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{index + 1}</Text>
-                                </View>
-                            </Animated.View>
+                            <View
+                                style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: 14,
+                                    backgroundColor: '#f97316',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderWidth: 2,
+                                    borderColor: '#fff',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }} allowFontScaling={false}>
+                                    {index + 1}
+                                </Text>
+                            </View>
                         </Marker>
                     ))}
                     {members
@@ -321,29 +316,25 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 title={m.name}
                                 coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
                             >
-                                <Animated.View
-                                    style={{ transform: [{ scale: getMarkerScale(m.id) }] }}
+                                <View
+                                    style={{
+                                        backgroundColor: m.color,
+                                        borderColor: '#fff',
+                                        borderWidth: 1.5,
+                                        borderRadius: 999,
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 5,
+                                        maxWidth: 180,
+                                    }}
                                 >
-                                    <View
-                                        style={{
-                                            backgroundColor: m.color,
-                                            borderColor: '#fff',
-                                            borderWidth: 1.5,
-                                            borderRadius: 999,
-                                            paddingHorizontal: 10,
-                                            paddingVertical: 5,
-                                            maxWidth: 180,
-                                        }}
+                                    <Text
+                                        style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}
+                                        numberOfLines={1}
+                                        allowFontScaling={false}
                                     >
-                                        <Text
-                                            style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}
-                                            numberOfLines={1}
-                                            maxFontSizeMultiplier={1.2}
-                                        >
-                                            {m.name.toUpperCase().substring(0, 2)}
-                                        </Text>
-                                    </View>
-                                </Animated.View>
+                                        {m.name.toUpperCase().substring(0, 2)}
+                                    </Text>
+                                </View>
                             </Marker>
                         ))}
                 </MapView>
@@ -446,7 +437,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 isSelf={member.id === uid}
                                 onPress={
                                     member.lat != null && member.lng != null
-                                        ? () => handleFocusPoint(member.id)
+                                        ? () => handleFocusPoint({ lat: member.lat as number, lng: member.lng as number }, member.id)
                                         : undefined
                                 }
                             />
@@ -471,7 +462,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                             <RouteList
                                 destination={journey.destination}
                                 stops={journey.stops ?? []}
-                                onSelect={(_point, key) => handleFocusPoint(key)}
+                                onSelect={handleFocusPoint}
                             />
                         </ScrollView>
                     </View>
