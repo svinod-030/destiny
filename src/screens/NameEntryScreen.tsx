@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,17 @@ export default function NameEntryScreen() {
     const [input, setInput] = useState('');
     const setName = useAuthStore((state) => state.setName);
     const colors = useThemeColors();
+    const inputRef = useRef<TextInput>(null);
+
+    useEffect(() => {
+        // This is the very first screen shown on a fresh install, right after
+        // the launch animation - focusing immediately on mount races with
+        // KeyboardAvoidingView/ScrollView before they've settled their layout,
+        // which is what let the keyboard cover the Continue button. A short
+        // delay lets that layout finish first.
+        const timer = setTimeout(() => inputRef.current?.focus(), 350);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleContinue = () => {
         if (!input.trim()) return;
@@ -42,11 +53,11 @@ export default function NameEntryScreen() {
                     </View>
 
                     <TextInput
+                        ref={inputRef}
                         value={input}
                         onChangeText={setInput}
                         placeholder="Your name"
                         placeholderTextColor={colors.placeholder}
-                        autoFocus
                         autoCapitalize="words"
                         className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg mb-6"
                         selectionColor="#0B74B1"
