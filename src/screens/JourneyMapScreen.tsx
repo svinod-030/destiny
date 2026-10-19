@@ -295,20 +295,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                         coordinate={{ latitude: journey.destination.lat, longitude: journey.destination.lng }}
                         title={journey.destination.name}
                     >
-                        <View
-                            style={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 20,
-                                backgroundColor: '#0B74B1',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderWidth: 2,
-                                borderColor: '#fff',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            <Ionicons name="flag" size={18} color="#fff" allowFontScaling={false} />
+                        <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                            <Ionicons name="flag" size={30} color="#EF4444" allowFontScaling={false} />
                         </View>
                     </Marker>
                     {(journey.stops ?? []).map((stop, index) => (
@@ -349,25 +337,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 }}
                                 title={m.name}
                                 coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
+                                anchor={{ x: 0.5, y: 1 }}
                             >
-                                <View
-                                    style={{
-                                        backgroundColor: m.color,
-                                        borderColor: '#fff',
-                                        borderWidth: 1.5,
-                                        borderRadius: 999,
-                                        paddingHorizontal: 10,
-                                        paddingVertical: 5,
-                                        maxWidth: 180,
-                                    }}
-                                >
-                                    <Text
-                                        style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}
-                                        numberOfLines={1}
-                                        allowFontScaling={false}
-                                    >
-                                        {m.name.toUpperCase().substring(0, 2)}
-                                    </Text>
+                                <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Ionicons name="location" size={36} color={m.color} allowFontScaling={false} />
                                 </View>
                             </Marker>
                         ))}
