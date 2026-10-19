@@ -20,6 +20,7 @@ import { BackgroundLocationDisclosureModal } from '../components/BackgroundLocat
 import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification, showMemberJoinedNotification, showMemberLeftNotification } from '../utils/journeyNotification';
 import { toHistoryMembers } from '../utils/historyMembers';
+import { openDirections } from '../utils/openDirections';
 import AdBanner from '../components/AdBanner';
 
 const getFitCoordinates = (journey: Journey) => [
@@ -296,6 +297,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                         }}
                         coordinate={{ latitude: journey.destination.lat, longitude: journey.destination.lng }}
                         title={journey.destination.name}
+                        description="Tap for directions"
+                        onCalloutPress={() => openDirections(journey.destination.lat, journey.destination.lng)}
                     >
                         <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                             <Ionicons name="flag" size={30} color="#EF4444" allowFontScaling={false} />
@@ -310,6 +313,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                             }}
                             coordinate={{ latitude: stop.lat, longitude: stop.lng }}
                             title={stop.name}
+                            description="Tap for directions"
+                            onCalloutPress={() => openDirections(stop.lat, stop.lng)}
                         >
                             <View
                                 style={{
@@ -340,6 +345,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                                     if (ref) calloutMarkerRefs.set(m.id, ref);
                                 }}
                                 title={m.name}
+                                description={m.id === uid ? undefined : 'Tap for directions'}
+                                onCalloutPress={
+                                    m.id === uid ? undefined : () => openDirections(m.lat as number, m.lng as number)
+                                }
                                 coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
                                 anchor={{ x: 0.5, y: 1 }}
                             >
@@ -439,6 +448,13 @@ export default function JourneyMapScreen({ navigation }: any) {
                 </View>
 
                 {activeTab === 'members' ? (
+                    <View className="flex-1">
+                    <View className="flex-row items-center px-5 pb-2">
+                        <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
+                        <Text className="text-gray-500 dark:text-gray-400 text-[11px] ml-1.5 flex-1">
+                            Tap a member to find them on the map, or Directions to navigate to them in Maps.
+                        </Text>
+                    </View>
                     <ScrollView className="px-4" contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
                         {members.map((member) => (
                             <MemberListItem
@@ -451,9 +467,15 @@ export default function JourneyMapScreen({ navigation }: any) {
                                         ? () => handleFocusPoint({ lat: member.lat as number, lng: member.lng as number }, member.id)
                                         : undefined
                                 }
+                                onNavigate={
+                                    member.id !== uid && member.lat != null && member.lng != null
+                                        ? () => openDirections(member.lat as number, member.lng as number)
+                                        : undefined
+                                }
                             />
                         ))}
                     </ScrollView>
+                    </View>
                 ) : (
                     <View className="flex-1">
                         {role === 'creator' && (
@@ -469,11 +491,18 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 </TouchableOpacity>
                             </View>
                         )}
+                    <View className="flex-row items-center px-5 pb-2">
+                        <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
+                        <Text className="text-gray-500 dark:text-gray-400 text-[11px] ml-1.5 flex-1">
+                            Tap a stop to find it on the map, or Directions to navigate there in Maps.
+                        </Text>
+                    </View>
                         <ScrollView className="px-4" contentContainerStyle={{ paddingBottom: 16 }}>
                             <RouteList
                                 destination={journey.destination}
                                 stops={journey.stops ?? []}
                                 onSelect={handleFocusPoint}
+                                onNavigate={(point) => openDirections(point.lat, point.lng)}
                             />
                         </ScrollView>
                     </View>

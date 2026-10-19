@@ -10,9 +10,11 @@ interface MemberListItemProps {
     destination: Destination;
     isSelf: boolean;
     onPress?: () => void;
+    // When given, shows a directions button that opens this member's location in Maps.
+    onNavigate?: () => void;
 }
 
-export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, onPress }) => {
+export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, onPress, onNavigate }) => {
     const hasLocation = member.lat != null && member.lng != null;
     const distanceMeters = hasLocation
         ? distanceInMeters(member.lat as number, member.lng as number, destination.lat, destination.lng)
@@ -54,7 +56,21 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
                     {statusLabel}
                 </Text>
             </View>
-            {onPress && <Ionicons name="locate-outline" size={18} color="#9ca3af" />}
+            {onNavigate ? (
+                <TouchableOpacity
+                    onPress={onNavigate}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Directions to ${member.name}`}
+                    className="flex-row items-center bg-ocean-600 pl-2.5 pr-3 py-1.5 rounded-full active:bg-ocean-700 ml-2"
+                >
+                    <Ionicons name="navigate" size={14} color="#fff" />
+                    <Text className="text-white font-bold text-xs ml-1" numberOfLines={1}>
+                        Directions
+                    </Text>
+                </TouchableOpacity>
+            ) : (
+                onPress && <Ionicons name="locate-outline" size={18} color="#9ca3af" />
+            )}
         </Row>
     );
 };
