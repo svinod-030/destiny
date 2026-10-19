@@ -60,6 +60,10 @@ export default function HomeScreen({ navigation, route }: any) {
     const [showsUserLocation, setShowsUserLocation] = useState(false);
     const [showLocationDisclosure, setShowLocationDisclosure] = useState(false);
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+    // True from the first keystroke (including the debounce wait) until results
+    // arrive, so there's no dead time where nothing on screen says it's working.
+    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const { uid, name } = useAuthStore();
     const activeJourneyId = useJourneyStore((state) => state.journeyId);
     const setActiveJourney = useJourneyStore((state) => state.setActiveJourney);
@@ -202,6 +206,7 @@ export default function HomeScreen({ navigation, route }: any) {
     useEffect(() => {
         if (suppressAutocompleteRef.current) {
             suppressAutocompleteRef.current = false;
+            setIsSuggesting(false);
             return;
         }
 
@@ -210,8 +215,13 @@ export default function HomeScreen({ navigation, route }: any) {
         const query = searchQuery.trim();
         if (query.length < MIN_QUERY_LENGTH) {
             setSuggestions([]);
+            setIsSuggesting(false);
             return;
         }
+
+        // A newer keystroke cancels this one; only the latest request may clear the spinner.
+        let cancelled = false;
+        setIsSuggesting(true);
 
         const timeout = setTimeout(async () => {
             try {
@@ -220,13 +230,18 @@ export default function HomeScreen({ navigation, route }: any) {
                     sessionTokenRef.current,
                     currentLocationRef.current ?? undefined
                 );
-                setSuggestions(results);
+                if (!cancelled) setSuggestions(results);
             } catch (error) {
                 console.error('Autocomplete failed:', error);
+            } finally {
+                if (!cancelled) setIsSuggesting(false);
             }
         }, AUTOCOMPLETE_DEBOUNCE_MS);
 
-        return () => clearTimeout(timeout);
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, [searchQuery]);
 
     const handleLongPress = async (event: LongPressEvent) => {
@@ -280,6 +295,7 @@ export default function HomeScreen({ navigation, route }: any) {
 
         Keyboard.dismiss();
         setSuggestions([]);
+        setIsSearching(true);
         try {
             const results = await Location.geocodeAsync(query);
             if (results.length === 0) {
@@ -298,6 +314,8 @@ export default function HomeScreen({ navigation, route }: any) {
         } catch (error) {
             console.error('Search failed:', error);
             Alert.alert('Error', 'Could not search for that location. Please try again.');
+        } finally {
+            setIsSearching(false);
         }
     };
 
@@ -465,22 +483,34 @@ export default function HomeScreen({ navigation, route }: any) {
                     height-capped with its own internal scroll so it can never grow tall enough to
                     bleed into the destination/stops panel below. */}
                 <View className="absolute top-3 left-3 right-3" style={{ zIndex: 30, elevation: 8 }}>
-                    <TextInput
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder={destinationPoint ? 'Search for a stop' : 'Search for a destination'}
-                        placeholderTextColor={colors.placeholder}
-                        className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
-                        style={{
-                            shadowColor: '#000',
-                            shadowOpacity: 0.3,
-                            shadowRadius: 8,
-                            shadowOffset: { width: 0, height: 2 },
-                            elevation: 4,
-                        }}
-                        returnKeyType="search"
-                        onSubmitEditing={handleSearch}
-                    />
+                    <View className="justify-center">
+                        <TextInput
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder={destinationPoint ? 'Search for a stop' : 'Search for a destination'}
+                            placeholderTextColor={colors.placeholder}
+                            className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 pr-12 rounded-2xl border border-gray-200 dark:border-gray-700"
+                            style={{
+                                shadowColor: '#000',
+                                shadowOpacity: 0.3,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 2 },
+                                elevation: 4,
+                            }}
+                            returnKeyType="search"
+                            onSubmitEditing={handleSearch}
+                        />
+                        {(isSuggesting || isSearching) && (
+                            <View
+                                className="absolute right-4"
+                                pointerEvents="none"
+                                accessibilityRole="progressbar"
+                                accessibilityLabel="Searching for places"
+                            >
+                                <ActivityIndicator size="small" color="#0B74B1" />
+                            </View>
+                        )}
+                    </View>
 
                     {suggestions.length > 0 && (
                         <View

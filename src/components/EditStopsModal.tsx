@@ -53,6 +53,9 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
     const [points, setPoints] = useState<DraggableStop[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+    // True from the first keystroke (including the debounce wait) until results
+    // arrive, so there's no dead time where nothing on screen says it's working.
+    const [isSuggesting, setIsSuggesting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     // Reset local editing state to the journey's current route each time the modal opens.
@@ -63,12 +66,14 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
         pointsRef.current = initial;
         setSearchQuery('');
         setSuggestions([]);
+        setIsSuggesting(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible]);
 
     useEffect(() => {
         if (suppressAutocompleteRef.current) {
             suppressAutocompleteRef.current = false;
+            setIsSuggesting(false);
             return;
         }
         if (!placesService.isConfigured()) return;
@@ -76,8 +81,13 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
         const query = searchQuery.trim();
         if (query.length < MIN_QUERY_LENGTH) {
             setSuggestions([]);
+            setIsSuggesting(false);
             return;
         }
+
+        // A newer keystroke cancels this one; only the latest request may clear the spinner.
+        let cancelled = false;
+        setIsSuggesting(true);
 
         const near = pointsRef.current[0] ?? destination;
         const timeout = setTimeout(async () => {
@@ -86,13 +96,18 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                     lat: near.lat,
                     lng: near.lng,
                 });
-                setSuggestions(results);
+                if (!cancelled) setSuggestions(results);
             } catch (error) {
                 console.error('Autocomplete failed:', error);
+            } finally {
+                if (!cancelled) setIsSuggesting(false);
             }
         }, AUTOCOMPLETE_DEBOUNCE_MS);
 
-        return () => clearTimeout(timeout);
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery]);
 
@@ -248,14 +263,26 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                     </Text>
 
                     <View className="px-4 pt-3">
-                        <TextInput
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search for a stop"
-                            placeholderTextColor={colors.placeholder}
-                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
-                            returnKeyType="search"
-                        />
+                        <View className="justify-center">
+                            <TextInput
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Search for a stop"
+                                placeholderTextColor={colors.placeholder}
+                                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-4 pr-12 rounded-2xl border border-gray-200 dark:border-gray-700"
+                                returnKeyType="search"
+                            />
+                            {isSuggesting && (
+                                <View
+                                    className="absolute right-4"
+                                    pointerEvents="none"
+                                    accessibilityRole="progressbar"
+                                    accessibilityLabel="Searching for places"
+                                >
+                                    <ActivityIndicator size="small" color="#0B74B1" />
+                                </View>
+                            )}
+                        </View>
                         {suggestions.length > 0 && (
                             <View
                                 className="mt-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
