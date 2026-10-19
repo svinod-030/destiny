@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, LongPressEvent } from 'react-native-maps';
+import { StaticMarker } from './StaticMarker';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
@@ -229,8 +230,9 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                             onLongPress={handleLongPress}
                         >
                             {points.map((point, index) => (
-                                <Marker
+                                <StaticMarker
                                     key={point.id}
+                                    appearanceKey={`point-${index}`}
                                     coordinate={{ latitude: point.lat, longitude: point.lng }}
                                     title={point.name || (index === 0 ? 'Destination' : `Stop ${index}`)}
                                     pinColor={index === 0 ? '#0B74B1' : undefined}
@@ -254,7 +256,7 @@ export function EditStopsModal({ visible, onClose, journeyId, destination, initi
                                             </Text>
                                         </View>
                                     )}
-                                </Marker>
+                                </StaticMarker>
                             ))}
                         </MapView>
                     </View>

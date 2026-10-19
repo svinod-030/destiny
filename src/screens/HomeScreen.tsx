@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput, Keyboard, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, LongPressEvent } from 'react-native-maps';
+import { StaticMarker } from '../components/StaticMarker';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
@@ -451,8 +452,9 @@ export default function HomeScreen({ navigation, route }: any) {
                             />
                         )}
                         {stopPoints.map((stop, index) => (
-                            <Marker
+                            <StaticMarker
                                 key={stop.id}
+                                appearanceKey={`stop-${index}`}
                                 coordinate={{ latitude: stop.lat, longitude: stop.lng }}
                                 title={stop.name || `Stop ${index + 1}`}
                             >
@@ -473,7 +475,7 @@ export default function HomeScreen({ navigation, route }: any) {
                                         {index + 1}
                                     </Text>
                                 </View>
-                            </Marker>
+                            </StaticMarker>
                         ))}
                     </MapView>
                 </View>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
+import { StaticMarker } from '../components/StaticMarker';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
 import { journeyHistoryService } from '../services/journeyHistoryService';
@@ -288,7 +289,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                         longitudeDelta: 0.05,
                     }}
                 >
-                    <Marker
+                    <StaticMarker
+                        appearanceKey="destination"
                         ref={(ref) => {
                             if (ref) calloutMarkerRefs.set('destination', ref);
                         }}
@@ -298,10 +300,11 @@ export default function JourneyMapScreen({ navigation }: any) {
                         <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                             <Ionicons name="flag" size={30} color="#EF4444" allowFontScaling={false} />
                         </View>
-                    </Marker>
+                    </StaticMarker>
                     {(journey.stops ?? []).map((stop, index) => (
-                        <Marker
+                        <StaticMarker
                             key={`${stop.lat}-${stop.lng}-${index}`}
+                            appearanceKey={`stop-${index}`}
                             ref={(ref) => {
                                 if (ref) calloutMarkerRefs.set(`stop-${index}`, ref);
                             }}
@@ -325,13 +328,14 @@ export default function JourneyMapScreen({ navigation }: any) {
                                     {index + 1}
                                 </Text>
                             </View>
-                        </Marker>
+                        </StaticMarker>
                     ))}
                     {members
                         .filter((m) => m.lat != null && m.lng != null)
                         .map((m) => (
-                            <Marker
+                            <StaticMarker
                                 key={m.id}
+                                appearanceKey={`${m.id}-${m.color}`}
                                 ref={(ref) => {
                                     if (ref) calloutMarkerRefs.set(m.id, ref);
                                 }}
@@ -342,7 +346,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                                     <Ionicons name="location" size={36} color={m.color} allowFontScaling={false} />
                                 </View>
-                            </Marker>
+                            </StaticMarker>
                         ))}
                 </MapView>
 
