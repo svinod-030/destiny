@@ -64,9 +64,6 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
                     className="flex-row items-center bg-ocean-600 pl-2.5 pr-3 py-1.5 rounded-full active:bg-ocean-700 ml-2"
                 >
                     <Ionicons name="navigate" size={14} color="#fff" />
-                    <Text className="text-white font-bold text-xs ml-1" numberOfLines={1}>
-                        Directions
-                    </Text>
                 </TouchableOpacity>
             ) : (
                 onPress && <Ionicons name="locate-outline" size={18} color="#9ca3af" />
