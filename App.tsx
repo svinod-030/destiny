@@ -2,6 +2,7 @@ import "./global.css";
 import React, { useEffect, useState } from 'react';
 import { Text, TextInput } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import mobileAds from 'react-native-google-mobile-ads';
 import AppNavigator from './src/navigation/AppNavigator';
 import NameEntryScreen from './src/screens/NameEntryScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -57,6 +58,16 @@ export default function App() {
   useEffect(() => {
     init();
   }, [init]);
+
+  // AdMob's quick-start asks for one initialize() call at startup, before any ad
+  // loads. A failure here must not hide ads for good - the SDK still starts on
+  // the first request - so the banner is released either way.
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .catch((error) => console.error('AdMob initialization failed:', error))
+      .finally(() => useAdConfigStore.getState().setSdkReady(true));
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setMinDisplayElapsed(true), LAUNCH_MIN_DISPLAY_MS);

@@ -48,6 +48,15 @@ jobs:
           echo EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }} >> .env
           echo EXPO_PUBLIC_FIREBASE_APP_ID=${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }} >> .env
           echo EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }} >> .env
+          echo EXPO_PUBLIC_ADMOB_ANDROID_APP_ID=${{ secrets.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID }} >> .env
+          echo EXPO_PUBLIC_ADMOB_BANNER_UNIT_ID_ANDROID=${{ secrets.EXPO_PUBLIC_ADMOB_BANNER_UNIT_ID_ANDROID }} >> .env
+
+      # Without a real unit ID the app silently falls back to Google's test banner
+      # (see AdBanner.tsx), which is easy to ship by accident - fail the build instead.
+      - name: Verify AdMob unit ID is set
+        run: |
+          grep -Eq '^EXPO_PUBLIC_ADMOB_BANNER_UNIT_ID_ANDROID=ca-app-pub-[0-9]+/[0-9]+$' .env \
+            || (echo "::error::EXPO_PUBLIC_ADMOB_BANNER_UNIT_ID_ANDROID is missing or malformed - add it as a repository secret." && exit 1)
 
       - name: Compile TypeScript
         run: npm run compile

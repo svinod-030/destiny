@@ -20,8 +20,11 @@ const UNIT_ID = __DEV__ || !PROD_UNIT_ID ? TestIds.BANNER : PROD_UNIT_ID;
  */
 export default function AdBanner() {
     const adsEnabled = useAdConfigStore((state) => state.adsEnabled);
+    const sdkReady = useAdConfigStore((state) => state.sdkReady);
 
-    if (!adsEnabled) return null;
+    // Wait for the SDK's startup initialization (App.tsx) so the first ad request
+    // doesn't race it.
+    if (!adsEnabled || !sdkReady) return null;
 
     return (
         <View className="items-center bg-gray-50 dark:bg-gray-900">
