@@ -3,7 +3,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
@@ -33,10 +33,15 @@ const LogoTitle = React.memo(({ tint }: { tint: string }) => (
 
 function HomeTabs() {
     const colors = useThemeColors();
+    const insets = useSafeAreaInsets();
 
     return (
         <SafeAreaView style={{ flex: 1 }} edges={['left', 'right', 'bottom']}>
             <View style={{ flex: 1, backgroundColor: colors.tabBarBackground }}>
+                {/* The SafeAreaView above already reserves the bottom system inset. The tab
+                    bar also pads itself by that inset, which doubled the gap under it - so it's
+                    told there's none left to apply. */}
+                <SafeAreaInsetsContext.Provider value={{ ...insets, bottom: 0 }}>
                 <Tab.Navigator
                     screenOptions={({ route }) => ({
                         headerShown: false,
@@ -44,7 +49,11 @@ function HomeTabs() {
                             backgroundColor: colors.tabBarBackground,
                             borderTopColor: colors.tabBarBorder,
                             elevation: 0,
-                            paddingTop: 5,
+                            // Explicit: the default height is derived from the bottom inset,
+                            // which is zeroed above, so it would otherwise clip the labels.
+                            height: 62,
+                            paddingTop: 6,
+                            paddingBottom: 8,
                         },
                         tabBarActiveTintColor: colors.tabActive,
                         tabBarInactiveTintColor: colors.tabInactive,
@@ -63,6 +72,7 @@ function HomeTabs() {
                     <Tab.Screen name="History" component={JourneyHistoryScreen} />
                     <Tab.Screen name="Settings" component={SettingsScreen} />
                 </Tab.Navigator>
+                </SafeAreaInsetsContext.Provider>
             </View>
         </SafeAreaView>
     );
