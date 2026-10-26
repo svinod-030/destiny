@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollVi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker } from 'react-native-maps';
 import { StaticMarker } from '../components/StaticMarker';
+import { MemberPin, PIN_ANCHOR, FLAG_ANCHOR } from '../components/MapPin';
+import { ShareIcon, LocateIcon } from '../components/MapControlIcons';
+import { memberPinImage, destinationFlagImage } from '../utils/markerImages';
 import { Ionicons } from '@expo/vector-icons';
 import { journeyService } from '../services/journeyService';
 import { journeyHistoryService } from '../services/journeyHistoryService';
@@ -299,11 +302,9 @@ export default function JourneyMapScreen({ navigation }: any) {
                         title={journey.destination.name}
                         description="Tap for directions"
                         onCalloutPress={() => openDirections(journey.destination.lat, journey.destination.lng)}
-                    >
-                        <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-                            <Ionicons name="flag" size={30} color="#EF4444" allowFontScaling={false} />
-                        </View>
-                    </StaticMarker>
+                        anchor={FLAG_ANCHOR}
+                        image={destinationFlagImage}
+                    />
                     {(journey.stops ?? []).map((stop, index) => (
                         <StaticMarker
                             key={`${stop.lat}-${stop.lng}-${index}`}
@@ -350,11 +351,11 @@ export default function JourneyMapScreen({ navigation }: any) {
                                     m.id === uid ? undefined : () => openDirections(m.lat as number, m.lng as number)
                                 }
                                 coordinate={{ latitude: m.lat as number, longitude: m.lng as number }}
-                                anchor={{ x: 0.5, y: 1 }}
+                                anchor={PIN_ANCHOR}
+                                image={memberPinImage(m.color)}
                             >
-                                <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Ionicons name="location" size={36} color={m.color} allowFontScaling={false} />
-                                </View>
+                                {/* Only for a colour with no pre-rendered image */}
+                                {!memberPinImage(m.color) && <MemberPin color={m.color} />}
                             </StaticMarker>
                         ))}
                 </MapView>
@@ -367,10 +368,10 @@ export default function JourneyMapScreen({ navigation }: any) {
                         accessibilityHint="Opens your journey code and QR code to share with others"
                         className="flex-row items-center bg-white/90 dark:bg-gray-900/90 pl-3 pr-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-700"
                     >
-                        <Ionicons name="share-social-outline" size={20} color="#0B74B1" />
+                        <ShareIcon size={20} />
                         <Text
                             numberOfLines={1}
-                            maxFontSizeMultiplier={1.4}
+                            allowFontScaling={false}
                             className="text-ocean-600 dark:text-ocean-400 font-bold ml-1.5 text-sm"
                         >
                             Share
@@ -382,7 +383,7 @@ export default function JourneyMapScreen({ navigation }: any) {
                         accessibilityLabel="Recenter map"
                         className="bg-white/90 dark:bg-gray-900/90 p-3 rounded-full border border-gray-200 dark:border-gray-700"
                     >
-                        <Ionicons name="locate" size={22} color="#0B74B1" />
+                        <LocateIcon size={22} />
                     </TouchableOpacity>
                 </View>
             </View>
