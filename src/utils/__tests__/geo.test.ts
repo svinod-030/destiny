@@ -59,3 +59,17 @@ describe('sortByDistanceFromPoint', () => {
         expect(sortByDistanceFromPoint([], destination)).toEqual([]);
     });
 });
+
+import { formatDuration } from '../geo';
+
+describe('formatDuration', () => {
+    it('shows minutes under an hour, never below 1', () => {
+        expect(formatDuration(10)).toBe('1 min');
+        expect(formatDuration(24 * 60)).toBe('24 min');
+    });
+
+    it('shows hours and minutes', () => {
+        expect(formatDuration(60 * 60)).toBe('1 hr');
+        expect(formatDuration(95 * 60)).toBe('1 hr 35 min');
+    });
+});
