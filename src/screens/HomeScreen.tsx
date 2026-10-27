@@ -36,7 +36,7 @@ const DEFAULT_REGION = {
 };
 
 const MIN_QUERY_LENGTH = 3;
-const AUTOCOMPLETE_DEBOUNCE_MS = 300;
+const AUTOCOMPLETE_DEBOUNCE_MS = 600;
 
 // Points closer together than this are treated as "the same place" and
 // rejected as a duplicate stop/destination rather than added again.

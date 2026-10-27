@@ -13,9 +13,9 @@ export interface LastFetch {
     failed: boolean;
 }
 
-export const MIN_REFRESH_INTERVAL_MS = 60_000;
+export const MIN_REFRESH_INTERVAL_MS = 120_000;
 export const RETRY_AFTER_FAILURE_MS = 5 * 60_000;
-export const MOVED_FAR_METERS = 500;
+export const MOVED_FAR_METERS = 800;
 // A stop this close to where the person is has already been reached - routing "via" it
 // again would send them back to it.
 export const STOP_REACHED_METERS = 150;

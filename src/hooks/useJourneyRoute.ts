@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { Journey } from '../types/journey';
 import { useFeatureFlagsStore } from '../store/useFeatureFlagsStore';
 import { directionsService, JourneyRoute } from '../services/directionsService';
@@ -17,6 +18,13 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
     const enabled = useFeatureFlagsStore((state) => state.directionsEnabled);
     const [route, setRoute] = useState<JourneyRoute | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    // The journey screen can stay mounted while the app is backgrounded (tracking keeps
+    // running), but nobody is looking at the route then - don't pay for refreshes.
+    const [appActive, setAppActive] = useState(AppState.currentState === 'active');
+    useEffect(() => {
+        const sub = AppState.addEventListener('change', (state) => setAppActive(state === 'active'));
+        return () => sub.remove();
+    }, []);
     const lastFetchRef = useRef<LastFetch | null>(null);
     const inFlightRef = useRef(false);
 
@@ -30,7 +38,7 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
             setRoute(null);
             return;
         }
-        if (!journey || myLat == null || myLng == null) return;
+        if (!appActive || !journey || myLat == null || myLng == null) return;
 
         const origin = { lat: myLat, lng: myLng };
         const destination = journey.destination;
@@ -63,7 +71,7 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
                 setIsLoading(false);
             });
         // Re-runs on every position / stop change; shouldRefreshRoute decides if it's worth a call.
-    }, [enabled, journey?.id, journey?.stops, journey?.destination, myLat, myLng]);
+    }, [enabled, appActive, journey?.id, journey?.stops, journey?.destination, myLat, myLng]);
 
     return { route: enabled ? route : null, isLoading };
 };
