@@ -2,28 +2,42 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { JourneyMember, Destination } from '../types/journey';
-import { distanceInMeters, formatDistance, hasArrived } from '../utils/geo';
+import { distanceInMeters, distanceViaStops, formatDistance, formatDuration, hasArrived, stopsAheadOf } from '../utils/geo';
 import { getInitials } from '../utils/color';
 
 interface MemberListItemProps {
     member: JourneyMember;
     destination: Destination;
     isSelf: boolean;
+    // Journey stops, in visiting order. The distance shown follows the stops still ahead
+    // of this member instead of cutting straight to the destination.
+    stops?: Destination[];
+    // The viewer's own road route (distance and time via the stops). Only the viewer has
+    // one, so only their row uses it; everyone else gets the straight-line estimate.
+    route?: { distanceMeters: number; durationSeconds: number } | null;
     onPress?: () => void;
     // When given, shows a directions button that opens this member's location in Maps.
     onNavigate?: () => void;
 }
 
-export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, onPress, onNavigate }) => {
+export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, stops = [], route, onPress, onNavigate }) => {
     const hasLocation = member.lat != null && member.lng != null;
-    const distanceMeters = hasLocation
-        ? distanceInMeters(member.lat as number, member.lng as number, destination.lat, destination.lng)
-        : null;
-    const arrived = distanceMeters != null && hasArrived(distanceMeters);
+    const here = hasLocation ? { lat: member.lat as number, lng: member.lng as number } : null;
+    // Arrival is about the destination itself, whatever the path to it.
+    const directMeters = here ? distanceInMeters(here.lat, here.lng, destination.lat, destination.lng) : null;
+    const arrived = directMeters != null && hasArrived(directMeters);
 
     let statusLabel = 'Waiting for location…';
-    if (distanceMeters != null) {
-        statusLabel = arrived ? 'Arrived' : formatDistance(distanceMeters);
+    if (here && directMeters != null) {
+        if (arrived) {
+            statusLabel = 'Arrived';
+        } else if (isSelf && route) {
+            statusLabel = `${formatDistance(route.distanceMeters)} · ${formatDuration(route.durationSeconds)}`;
+        } else {
+            const stopsLeft = stopsAheadOf(here, stops, destination).length;
+            const meters = stopsLeft > 0 ? distanceViaStops(here, stops, destination) : directMeters;
+            statusLabel = `${stopsLeft > 0 ? '~' : ''}${formatDistance(meters)}${stopsLeft > 0 ? ' via stops' : ''}`;
+        }
     }
 
     const Row = onPress ? TouchableOpacity : View;

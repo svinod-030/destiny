@@ -14,7 +14,7 @@ import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useLiveLocation } from '../hooks/useLiveLocation';
 import { Journey } from '../types/journey';
-import { distanceInMeters, formatDistance, formatDuration } from '../utils/geo';
+import { distanceViaStops, formatDistance, formatDuration } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { EditStopsModal } from '../components/EditStopsModal';
@@ -275,12 +275,14 @@ export default function JourneyMapScreen({ navigation }: any) {
         );
     }
 
+    // Closest to finishing first, measured along the stops still ahead (same measure the
+    // rows show) rather than straight to the destination.
+    const remaining = (m: { lat: number | null; lng: number | null }) =>
+        distanceViaStops({ lat: m.lat as number, lng: m.lng as number }, journey.stops ?? [], journey.destination);
     const members = Object.values(journey.members).sort((a, b) => {
         if (a.lat == null || a.lng == null) return 1;
         if (b.lat == null || b.lng == null) return -1;
-        const distA = distanceInMeters(a.lat, a.lng, journey.destination.lat, journey.destination.lng);
-        const distB = distanceInMeters(b.lat, b.lng, journey.destination.lat, journey.destination.lng);
-        return distA - distB;
+        return remaining(a) - remaining(b);
     });
 
     return (
@@ -485,6 +487,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 member={member}
                                 destination={journey.destination}
                                 isSelf={member.id === uid}
+                                stops={journey.stops ?? []}
+                                route={member.id === uid ? route : null}
                                 onPress={
                                     member.lat != null && member.lng != null
                                         ? () => handleFocusPoint({ lat: member.lat as number, lng: member.lng as number }, member.id)
