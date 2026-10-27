@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Journey } from '../types/journey';
+import { useFeatureFlagsStore } from '../store/useFeatureFlagsStore';
 import { directionsService, JourneyRoute } from '../services/directionsService';
 import { hasArrived, distanceInMeters } from '../utils/geo';
 import { LastFetch, routeKeyFor, shouldRefreshRoute, stopsStillAhead } from '../utils/routeRefresh';
@@ -11,6 +12,9 @@ import { LastFetch, routeKeyFor, shouldRefreshRoute, stopsStillAhead } from '../
  * arrived, or the Directions call fails (the map just keeps working without the line).
  */
 export const useJourneyRoute = (journey: Journey | null, uid: string | null) => {
+    // Remote kill-switch (config/features.directionsEnabled): when off, no Directions
+    // calls are made and any route already on screen is dropped.
+    const enabled = useFeatureFlagsStore((state) => state.directionsEnabled);
     const [route, setRoute] = useState<JourneyRoute | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const lastFetchRef = useRef<LastFetch | null>(null);
@@ -21,6 +25,11 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
     const myLng = me?.lng ?? null;
 
     useEffect(() => {
+        if (!enabled) {
+            lastFetchRef.current = null;
+            setRoute(null);
+            return;
+        }
         if (!journey || myLat == null || myLng == null) return;
 
         const origin = { lat: myLat, lng: myLng };
@@ -54,7 +63,7 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
                 setIsLoading(false);
             });
         // Re-runs on every position / stop change; shouldRefreshRoute decides if it's worth a call.
-    }, [journey?.id, journey?.stops, journey?.destination, myLat, myLng]);
+    }, [enabled, journey?.id, journey?.stops, journey?.destination, myLat, myLng]);
 
-    return { route, isLoading };
+    return { route: enabled ? route : null, isLoading };
 };

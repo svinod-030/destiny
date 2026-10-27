@@ -22,10 +22,22 @@ describe('featureConfigService', () => {
 
             featureConfigService.subscribeToFeatureConfig(onUpdate);
 
-            expect(onUpdate).toHaveBeenCalledWith({ adsEnabled: true });
+            expect(onUpdate).toHaveBeenCalledWith({ adsEnabled: true, directionsEnabled: false });
         });
 
-        test('defaults to adsEnabled: false when the document does not exist', () => {
+        test('reads directionsEnabled and leaves other flags at their defaults', () => {
+            const onUpdate = jest.fn();
+            (onSnapshot as jest.Mock).mockImplementationOnce((_ref, next) => {
+                next({ exists: () => true, data: () => ({ directionsEnabled: true }) });
+                return jest.fn();
+            });
+
+            featureConfigService.subscribeToFeatureConfig(onUpdate);
+
+            expect(onUpdate).toHaveBeenCalledWith({ adsEnabled: false, directionsEnabled: true });
+        });
+
+        test('defaults every flag to false when the document does not exist', () => {
             const onUpdate = jest.fn();
             (onSnapshot as jest.Mock).mockImplementationOnce((_ref, next) => {
                 next({ exists: () => false });
@@ -34,7 +46,7 @@ describe('featureConfigService', () => {
 
             featureConfigService.subscribeToFeatureConfig(onUpdate);
 
-            expect(onUpdate).toHaveBeenCalledWith({ adsEnabled: false });
+            expect(onUpdate).toHaveBeenCalledWith({ adsEnabled: false, directionsEnabled: false });
         });
 
         test('forwards errors from the subscription', () => {
