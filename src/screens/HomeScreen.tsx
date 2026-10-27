@@ -18,6 +18,7 @@ import { Destination } from '../types/journey';
 import { StopsDragList } from '../components/StopsDragList';
 import { PermissionDisclosureModal } from '../components/PermissionDisclosureModal';
 import { colorForId } from '../utils/color';
+import { getBestCurrentLocation } from '../utils/currentLocation';
 
 interface SelectedPoint {
     id: string;
@@ -141,15 +142,28 @@ export default function HomeScreen({ navigation, route }: any) {
     const useCurrentLocation = async () => {
         try {
             setShowsUserLocation(true);
-            const current = await Location.getCurrentPositionAsync({});
-            currentLocationRef.current = { lat: current.coords.latitude, lng: current.coords.longitude };
-            if (selectedPointsRef.current.length > 0) return;
-            mapRef.current?.animateToRegion({
-                latitude: current.coords.latitude,
-                longitude: current.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            });
+
+            const showOnMap = (c: { lat: number; lng: number }) => {
+                currentLocationRef.current = c;
+                if (selectedPointsRef.current.length > 0) return;
+                mapRef.current?.animateToRegion({
+                    latitude: c.lat,
+                    longitude: c.lng,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                });
+            };
+
+            // Last known position shows up at once; a fresh fix then refines it.
+            const best = await getBestCurrentLocation(showOnMap);
+            if (best) {
+                showOnMap(best);
+            } else if (!(await Location.hasServicesEnabledAsync())) {
+                Alert.alert(
+                    'Location is turned off',
+                    'Turn on location in your phone settings so RoadTrip can show where you are.'
+                );
+            }
         } catch (error) {
             console.error('Failed to get current location:', error);
         }
