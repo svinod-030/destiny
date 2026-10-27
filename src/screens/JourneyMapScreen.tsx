@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 import { StaticMarker } from '../components/StaticMarker';
 import { MemberPin, PIN_ANCHOR, FLAG_ANCHOR } from '../components/MapPin';
 import { ShareIcon, LocateIcon } from '../components/MapControlIcons';
@@ -14,7 +14,7 @@ import { useJourneyStore } from '../store/useJourneyStore';
 import { useJourneyHistoryStore } from '../store/useJourneyHistoryStore';
 import { useLiveLocation } from '../hooks/useLiveLocation';
 import { Journey } from '../types/journey';
-import { distanceInMeters } from '../utils/geo';
+import { distanceViaStops, formatDistance, formatDuration } from '../utils/geo';
 import { ShareJourneyCard } from '../components/ShareJourneyCard';
 import { MemberListItem } from '../components/MemberListItem';
 import { EditStopsModal } from '../components/EditStopsModal';
@@ -24,6 +24,7 @@ import { useThemeColors } from '../utils/theme';
 import { showArrivalNotification, showMemberJoinedNotification, showMemberLeftNotification } from '../utils/journeyNotification';
 import { toHistoryMembers } from '../utils/historyMembers';
 import { openDirections } from '../utils/openDirections';
+import { useJourneyRoute } from '../hooks/useJourneyRoute';
 import AdBanner from '../components/AdBanner';
 
 const getFitCoordinates = (journey: Journey) => [
@@ -51,6 +52,8 @@ export default function JourneyMapScreen({ navigation }: any) {
     const [editStopsVisible, setEditStopsVisible] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
     const [activeTab, setActiveTab] = useState<'members' | 'route'>('members');
+
+    const { route } = useJourneyRoute(journey, uid);
 
     const { permissionDenied, showBackgroundPrompt, enableBackgroundTracking, dismissBackgroundPrompt } = useLiveLocation({
         journeyId,
@@ -272,12 +275,14 @@ export default function JourneyMapScreen({ navigation }: any) {
         );
     }
 
+    // Closest to finishing first, measured along the stops still ahead (same measure the
+    // rows show) rather than straight to the destination.
+    const remaining = (m: { lat: number | null; lng: number | null }) =>
+        distanceViaStops({ lat: m.lat as number, lng: m.lng as number }, journey.stops ?? [], journey.destination);
     const members = Object.values(journey.members).sort((a, b) => {
         if (a.lat == null || a.lng == null) return 1;
         if (b.lat == null || b.lng == null) return -1;
-        const distA = distanceInMeters(a.lat, a.lng, journey.destination.lat, journey.destination.lng);
-        const distB = distanceInMeters(b.lat, b.lng, journey.destination.lat, journey.destination.lng);
-        return distA - distB;
+        return remaining(a) - remaining(b);
     });
 
     return (
@@ -293,6 +298,15 @@ export default function JourneyMapScreen({ navigation }: any) {
                         longitudeDelta: 0.05,
                     }}
                 >
+                    {route && route.coordinates.length > 1 && (
+                        <Polyline
+                            coordinates={route.coordinates}
+                            strokeColor="#0B74B1"
+                            strokeWidth={5}
+                            lineCap="round"
+                            lineJoin="round"
+                        />
+                    )}
                     <StaticMarker
                         appearanceKey="destination"
                         ref={(ref) => {
@@ -403,6 +417,16 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 ? ` · ${journey.stops.length} ${journey.stops.length === 1 ? 'stop' : 'stops'}`
                                 : ''}
                         </Text>
+                        {route && (
+                            <Text
+                                className="text-ocean-600 dark:text-ocean-400 text-xs font-bold mt-0.5"
+                                numberOfLines={1}
+                            >
+                                {formatDuration(route.durationSeconds)} · {formatDistance(route.distanceMeters)} to
+                                destination
+                                {(journey.stops?.length ?? 0) > 0 ? ' via stops' : ''}
+                            </Text>
+                        )}
                     </View>
                     <TouchableOpacity
                         onPress={handleEndOrLeave}
@@ -463,6 +487,8 @@ export default function JourneyMapScreen({ navigation }: any) {
                                 member={member}
                                 destination={journey.destination}
                                 isSelf={member.id === uid}
+                                stops={journey.stops ?? []}
+                                route={member.id === uid ? route : null}
                                 onPress={
                                     member.lat != null && member.lng != null
                                         ? () => handleFocusPoint({ lat: member.lat as number, lng: member.lng as number }, member.id)

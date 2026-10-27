@@ -44,16 +44,17 @@ function logAppCheckStatus(functionName: string, app: CallableRequest['app']): v
  * these proxied Places calls, otherwise records this call against it.
  * Firestore-backed (no extra infra) - one doc per user per UTC day.
  */
-async function enforceRateLimit(uid: string): Promise<void> {
+async function enforceRateLimit(uid: string, bucket = 'places', limit = DAILY_REQUEST_LIMIT): Promise<void> {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
-    const ref = db.collection('placesRateLimits').doc(`${uid}_${today}`);
+    // 'places' keeps the original doc ids so existing counters carry over.
+    const ref = db.collection('placesRateLimits').doc(bucket === 'places' ? `${uid}_${today}` : `${uid}_${bucket}_${today}`);
 
     await db.runTransaction(async (tx) => {
         const snapshot = await tx.get(ref);
         const count = snapshot.exists ? ((snapshot.data()?.count as number) ?? 0) : 0;
 
-        if (count >= DAILY_REQUEST_LIMIT) {
-            throw new HttpsError('resource-exhausted', 'Daily search limit reached. Please try again tomorrow.');
+        if (count >= limit) {
+            throw new HttpsError('resource-exhausted', 'Daily limit reached. Please try again tomorrow.');
         }
 
         tx.set(ref, { count: count + 1, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
@@ -150,6 +151,88 @@ export const placesDetails = onCall(
             name: json.displayName?.text ?? '',
             lat: json.location.latitude,
             lng: json.location.longitude,
+        };
+    }
+);
+
+// Routes cost more than autocomplete and the app refreshes them while a journey is
+// live, so they get their own (lower) daily budget instead of sharing the Places one.
+const DIRECTIONS_DAILY_LIMIT = 200;
+const ROUTES_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+// Routes API allows 25 intermediate waypoints; stops beyond that are dropped.
+const MAX_WAYPOINTS = 25;
+
+const isLatLng = (v: any): v is LatLng =>
+    v && typeof v.lat === 'number' && typeof v.lng === 'number' && Math.abs(v.lat) <= 90 && Math.abs(v.lng) <= 180;
+
+const toWaypoint = (p: LatLng) => ({ location: { latLng: { latitude: p.lat, longitude: p.lng } } });
+
+// "123s" -> 123
+const parseSeconds = (d: unknown): number => (typeof d === 'string' ? parseInt(d, 10) || 0 : 0);
+
+/**
+ * Driving route origin -> stops (in the order given) -> destination, via Google's
+ * Routes API (the current successor to the Directions API). Reuses the Places
+ * secret, so that key needs "Routes API" enabled and allowed too.
+ */
+export const getDirections = onCall(
+    { secrets: [PLACES_API_KEY], region: REGION, enforceAppCheck: ENFORCE_APP_CHECK },
+    async (request) => {
+        logAppCheckStatus('getDirections', request.app);
+
+        if (!request.auth) {
+            throw new HttpsError('unauthenticated', 'Sign in required.');
+        }
+
+        const { origin, destination, waypoints } = (request.data ?? {}) as {
+            origin?: LatLng;
+            destination?: LatLng;
+            waypoints?: LatLng[];
+        };
+
+        if (!isLatLng(origin) || !isLatLng(destination)) {
+            throw new HttpsError('invalid-argument', 'origin and destination are required.');
+        }
+        const stops = (Array.isArray(waypoints) ? waypoints : []).filter(isLatLng).slice(0, MAX_WAYPOINTS);
+
+        await enforceRateLimit(request.auth.uid, 'directions', DIRECTIONS_DAILY_LIMIT);
+
+        const response = await fetch(ROUTES_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': PLACES_API_KEY.value(),
+                'X-Goog-FieldMask':
+                    'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.duration,routes.legs.distanceMeters',
+            },
+            body: JSON.stringify({
+                origin: toWaypoint(origin),
+                destination: toWaypoint(destination),
+                intermediates: stops.map(toWaypoint),
+                travelMode: 'DRIVE',
+                routingPreference: 'TRAFFIC_AWARE',
+                polylineQuality: 'OVERVIEW',
+            }),
+        });
+        const json = await response.json();
+
+        if (!response.ok) {
+            throw new HttpsError('internal', json.error?.message || `Directions failed: ${response.status}`);
+        }
+
+        const route = json.routes?.[0];
+        if (!route?.polyline?.encodedPolyline) {
+            throw new HttpsError('not-found', 'No route found between these points.');
+        }
+
+        return {
+            encodedPolyline: route.polyline.encodedPolyline as string,
+            distanceMeters: (route.distanceMeters as number) ?? 0,
+            durationSeconds: parseSeconds(route.duration),
+            legs: ((route.legs ?? []) as any[]).map((leg) => ({
+                distanceMeters: (leg.distanceMeters as number) ?? 0,
+                durationSeconds: parseSeconds(leg.duration),
+            })),
         };
     }
 );

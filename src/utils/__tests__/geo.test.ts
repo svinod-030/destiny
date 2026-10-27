@@ -59,3 +59,60 @@ describe('sortByDistanceFromPoint', () => {
         expect(sortByDistanceFromPoint([], destination)).toEqual([]);
     });
 });
+
+import { formatDuration } from '../geo';
+
+describe('formatDuration', () => {
+    it('shows minutes under an hour, never below 1', () => {
+        expect(formatDuration(10)).toBe('1 min');
+        expect(formatDuration(24 * 60)).toBe('24 min');
+    });
+
+    it('shows hours and minutes', () => {
+        expect(formatDuration(60 * 60)).toBe('1 hr');
+        expect(formatDuration(95 * 60)).toBe('1 hr 35 min');
+    });
+});
+
+import { distanceViaStops, stopsAheadOf } from '../geo';
+
+describe('distance via stops', () => {
+    const dest = { lat: 17.5, lng: 78.5 };
+    const stopA = { lat: 17.3, lng: 78.3 }; // farthest from the destination
+    const stopB = { lat: 17.4, lng: 78.4 };
+    const start = { lat: 17.2, lng: 78.2 };
+
+    it('goes through every stop when none has been reached', () => {
+        const direct = distanceInMeters(start.lat, start.lng, dest.lat, dest.lng);
+        const via = distanceViaStops(start, [stopA, stopB], dest);
+        // These points lie on one line, so going via them is the same length.
+        expect(via).toBeCloseTo(direct, -2);
+        expect(stopsAheadOf(start, [stopA, stopB], dest)).toEqual([stopA, stopB]);
+    });
+
+    it('is longer than the direct distance when the stops are off to the side', () => {
+        const side = { lat: 17.6, lng: 78.2 };
+        const direct = distanceInMeters(start.lat, start.lng, dest.lat, dest.lng);
+        expect(distanceViaStops(start, [side], dest)).toBeGreaterThan(direct * 1.2);
+    });
+
+    it('skips stops already passed (closer to the destination than the person is)', () => {
+        const pastA = { lat: 17.41, lng: 78.41 }; // person is beyond stop A and B now
+        expect(stopsAheadOf(pastA, [stopA, stopB], dest)).toEqual([]);
+        expect(distanceViaStops(pastA, [stopA, stopB], dest)).toBeCloseTo(
+            distanceInMeters(pastA.lat, pastA.lng, dest.lat, dest.lng),
+            0
+        );
+    });
+
+    it('skips a stop the person is standing at', () => {
+        expect(stopsAheadOf({ lat: 17.3001, lng: 78.3 }, [stopA, stopB], dest)).toEqual([stopB]);
+    });
+
+    it('with no stops equals the direct distance', () => {
+        expect(distanceViaStops(start, [], dest)).toBeCloseTo(
+            distanceInMeters(start.lat, start.lng, dest.lat, dest.lng),
+            0
+        );
+    });
+});

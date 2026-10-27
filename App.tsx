@@ -11,6 +11,7 @@ import LaunchLoader, { LAUNCH_MIN_DISPLAY_MS } from './src/components/LaunchLoad
 import { useAuthStore } from './src/store/useAuthStore';
 import { useOnboardingStore } from './src/store/useOnboardingStore';
 import { useAdConfigStore } from './src/store/useAdConfigStore';
+import { useFeatureFlagsStore } from './src/store/useFeatureFlagsStore';
 import { useJourneyHistoryStore } from './src/store/useJourneyHistoryStore';
 import { checkVersion } from './src/utils/versionCheckService';
 import { setupAppCheck } from './src/utils/appCheck';
@@ -89,6 +90,7 @@ export default function App() {
     const unsubscribe = featureConfigService.subscribeToFeatureConfig(
       (config) => {
         useAdConfigStore.getState().setAdsEnabled(config.adsEnabled);
+        useFeatureFlagsStore.getState().setDirectionsEnabled(config.directionsEnabled);
       },
       (error) => {
         console.error('Failed to subscribe to feature config:', error);

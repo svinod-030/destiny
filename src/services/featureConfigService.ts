@@ -3,9 +3,11 @@ import { db } from '../utils/firebase';
 
 export interface FeatureConfig {
     adsEnabled: boolean;
+    // Route line + ETA on the live journey map (needs the getDirections Cloud Function).
+    directionsEnabled: boolean;
 }
 
-const DEFAULT_FEATURE_CONFIG: FeatureConfig = { adsEnabled: false };
+const DEFAULT_FEATURE_CONFIG: FeatureConfig = { adsEnabled: false, directionsEnabled: false };
 
 export const featureConfigService = {
     /**

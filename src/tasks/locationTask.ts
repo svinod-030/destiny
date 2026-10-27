@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { LocationObject } from 'expo-location';
 import { journeyService } from '../services/journeyService';
 import { distanceInMeters, hasArrived } from '../utils/geo';
+import { currentEtaSeconds } from '../utils/etaAnchor';
 
 export const BACKGROUND_LOCATION_TASK = 'destiny-background-location';
 
@@ -46,13 +47,18 @@ TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
               )
             : false;
 
+        const eta = await currentEtaSeconds(journeyId, {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude,
+        });
         await journeyService.updateMemberLocation(
             journeyId,
             memberId,
             location.coords.latitude,
             location.coords.longitude,
             location.coords.heading,
-            arrived
+            arrived,
+            eta
         );
     } catch (e) {
         console.error('Failed to push background location:', e);
