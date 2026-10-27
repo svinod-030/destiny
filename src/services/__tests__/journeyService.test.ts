@@ -121,6 +121,28 @@ describe('journeyService', () => {
             expect(update['members.member-uid.lng']).toBe(56.78);
             expect(update['members.member-uid.heading']).toBe(90);
         });
+
+        test('stores the travel-time estimate alongside the location', async () => {
+            await journeyService.updateMemberLocation('ABC123', 'member-uid', 12.34, 56.78, 90, false, 1530);
+
+            const [, update] = (updateDoc as jest.Mock).mock.calls[0];
+            expect(update['members.member-uid.etaSeconds']).toBe(1530);
+        });
+
+        test('stores null when no estimate is known, so a stale one is cleared', async () => {
+            await journeyService.updateMemberLocation('ABC123', 'member-uid', 12.34, 56.78, 90);
+
+            const [, update] = (updateDoc as jest.Mock).mock.calls[0];
+            expect(update['members.member-uid.etaSeconds']).toBeNull();
+        });
+
+        test('stores 0 once the member has arrived, whatever estimate was passed', async () => {
+            await journeyService.updateMemberLocation('ABC123', 'member-uid', 12.34, 56.78, 90, true, 400);
+
+            const [, update] = (updateDoc as jest.Mock).mock.calls[0];
+            expect(update['members.member-uid.etaSeconds']).toBe(0);
+            expect(update['members.member-uid.hasArrived']).toBe(true);
+        });
     });
 
     describe('leaveJourney', () => {

@@ -8,6 +8,7 @@ import {
 } from '../tasks/locationTask';
 import { showJourneyNotification, dismissJourneyNotification } from '../utils/journeyNotification';
 import { distanceInMeters, hasArrived } from '../utils/geo';
+import { currentEtaSeconds, setEtaAnchor } from '../utils/etaAnchor';
 
 type Coordinate = { lat: number; lng: number };
 
@@ -75,13 +76,19 @@ export const useLiveLocation = ({ journeyId, memberId, enabled, destination }: U
                   )
                 : false;
 
-            return journeyService.updateMemberLocation(
-                journeyId,
-                memberId,
-                location.coords.latitude,
-                location.coords.longitude,
-                location.coords.heading,
-                arrived
+            return currentEtaSeconds(journeyId, {
+                lat: location.coords.latitude,
+                lng: location.coords.longitude,
+            }).then((eta) =>
+                journeyService.updateMemberLocation(
+                    journeyId,
+                    memberId,
+                    location.coords.latitude,
+                    location.coords.longitude,
+                    location.coords.heading,
+                    arrived,
+                    eta
+                )
             );
         };
 
@@ -116,6 +123,7 @@ export const useLiveLocation = ({ journeyId, memberId, enabled, destination }: U
             subscriptionRef.current?.remove();
             subscriptionRef.current = null;
             clearBackgroundLocationTarget().catch(() => { });
+            setEtaAnchor(null).catch(() => { });
             dismissJourneyNotification();
             Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)
                 .then((started) => {

@@ -20,6 +20,10 @@ interface MemberListItemProps {
     onNavigate?: () => void;
 }
 
+// A travel time is only believable while the member's phone is still reporting; after
+// this long without an update (phone off, no signal) it's hidden rather than shown stale.
+const ETA_FRESH_MS = 15 * 60_000;
+
 export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destination, isSelf, stops = [], route, onPress, onNavigate }) => {
     const hasLocation = member.lat != null && member.lng != null;
     const here = hasLocation ? { lat: member.lat as number, lng: member.lng as number } : null;
@@ -36,7 +40,17 @@ export const MemberListItem: React.FC<MemberListItemProps> = ({ member, destinat
         } else {
             const stopsLeft = stopsAheadOf(here, stops, destination).length;
             const meters = stopsLeft > 0 ? distanceViaStops(here, stops, destination) : directMeters;
-            statusLabel = `${stopsLeft > 0 ? '~' : ''}${formatDistance(meters)}${stopsLeft > 0 ? ' via stops' : ''}`;
+            const updatedMs = member.updatedAt ? new Date(member.updatedAt).getTime() : 0;
+            const etaIsFresh = member.etaSeconds != null && Date.now() - updatedMs <= ETA_FRESH_MS;
+
+            statusLabel = `~${formatDistance(meters)}`;
+            if (etaIsFresh) {
+                statusLabel += ` · ${formatDuration(member.etaSeconds as number)}`;
+            } else if (stopsLeft > 0) {
+                statusLabel += ' via stops';
+            } else {
+                statusLabel = formatDistance(meters);
+            }
         }
     }
 

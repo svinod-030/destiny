@@ -14,6 +14,9 @@ export interface JourneyMember {
     heading?: number | null;
     hasArrived?: boolean;
     arrivedAt?: string | null;
+    // Seconds of travel left to the destination as of `updatedAt`, worked out on the
+    // member's own phone from its road route. Null/absent when no route is known.
+    etaSeconds?: number | null;
     updatedAt: string | null;
 }
 

@@ -111,7 +111,8 @@ export const journeyService = {
         lat: number,
         lng: number,
         heading?: number | null,
-        hasArrived?: boolean
+        hasArrived?: boolean,
+        etaSeconds?: number | null
     ): Promise<void> => {
         const journeyRef = doc(db, JOURNEYS_COLLECTION, journeyId);
         const now = new Date().toISOString();
@@ -121,6 +122,7 @@ export const journeyService = {
             [`members.${memberId}.lng`]: lng,
             [`members.${memberId}.heading`]: heading ?? null,
             [`members.${memberId}.updatedAt`]: now,
+            [`members.${memberId}.etaSeconds`]: hasArrived ? 0 : etaSeconds ?? null,
             lastUpdatedAt: now,
         };
         if (hasArrived) {

@@ -5,6 +5,7 @@ import { useFeatureFlagsStore } from '../store/useFeatureFlagsStore';
 import { directionsService, JourneyRoute } from '../services/directionsService';
 import { hasArrived, distanceInMeters } from '../utils/geo';
 import { LastFetch, routeKeyFor, shouldRefreshRoute, stopsStillAhead } from '../utils/routeRefresh';
+import { buildEtaAnchor, setEtaAnchor } from '../utils/etaAnchor';
 
 /**
  * Driving route from the viewer's own position, through the journey's stops (in
@@ -36,6 +37,7 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
         if (!enabled) {
             lastFetchRef.current = null;
             setRoute(null);
+            setEtaAnchor(null).catch(() => { });
             return;
         }
         if (!appActive || !journey || myLat == null || myLng == null) return;
@@ -46,6 +48,7 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
         if (hasArrived(distanceInMeters(myLat, myLng, destination.lat, destination.lng))) {
             lastFetchRef.current = null;
             setRoute(null);
+            setEtaAnchor(null).catch(() => { });
             return;
         }
 
@@ -60,6 +63,10 @@ export const useJourneyRoute = (journey: Journey | null, uid: string | null) => 
             .then((result) => {
                 lastFetchRef.current = { origin, routeKey, at: Date.now(), failed: false };
                 setRoute(result);
+                // Everyone's phone writes its own travel time; this is what it's scaled from.
+                setEtaAnchor(
+                    buildEtaAnchor(journey.id, result.durationSeconds, origin, journey.stops ?? [], destination)
+                ).catch(() => { });
             })
             .catch((error) => {
                 // No line is a fine fallback; log once per attempt and back off (see routeRefresh).
